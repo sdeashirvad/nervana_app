@@ -1,14 +1,20 @@
 import React from "react";
-import { StyleSheet, View, Text } from "react-native";
+import { StyleSheet, View, Text, Platform } from "react-native";
 import { useRouter } from "expo-router";
 import { AtmosphericBackground } from "@/components/AtmosphericBackground";
 import { CalmButton } from "@/components/CalmButton";
 import { GlowText } from "@/components/GlowText";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { useColors } from "@/hooks/useColors";
+import Animated, { FadeInUp, FadeIn } from "react-native-reanimated";
 
 export default function AuthScreen() {
   const router = useRouter();
   const insets = useSafeAreaInsets();
+  const colors = useColors();
+
+  const topPad = Platform.OS === "web" ? 80 : insets.top + 60;
+  const bottomPad = Platform.OS === "web" ? 48 : insets.bottom + 40;
 
   const handleContinue = () => {
     router.push("/flow");
@@ -16,13 +22,29 @@ export default function AuthScreen() {
 
   return (
     <AtmosphericBackground>
-      <View style={[styles.container, { paddingTop: insets.top + 60, paddingBottom: insets.bottom + 40 }]}>
-        <View style={styles.header}>
+      <View
+        style={[
+          styles.container,
+          { paddingTop: topPad, paddingBottom: bottomPad },
+        ]}
+      >
+        <Animated.View
+          entering={FadeInUp.delay(60).duration(700)}
+          style={styles.header}
+        >
           <GlowText style={styles.logo}>Nervana</GlowText>
-          <Text style={styles.subtitle}>A private space for your mind.</Text>
-        </View>
+          <Text style={[styles.tagline, { color: colors.mutedForeground }]}>
+            your mental exhale
+          </Text>
+          <Text style={[styles.subtitle, { color: colors.secondaryForeground }]}>
+            A private space to decompress,{"\n"}reflect, and breathe.
+          </Text>
+        </Animated.View>
 
-        <View style={styles.buttons}>
+        <Animated.View
+          entering={FadeInUp.delay(240).duration(600)}
+          style={styles.buttons}
+        >
           <CalmButton
             title="Continue with Google"
             onPress={handleContinue}
@@ -33,24 +55,29 @@ export default function AuthScreen() {
             onPress={handleContinue}
             style={styles.button}
           />
-          
+
           <View style={styles.separator}>
-            <View style={styles.line} />
-            <Text style={styles.separatorText}>or</Text>
-            <View style={styles.line} />
+            <View style={[styles.line, { backgroundColor: colors.border }]} />
+            <Text style={[styles.separatorText, { color: colors.mutedForeground }]}>
+              or
+            </Text>
+            <View style={[styles.line, { backgroundColor: colors.border }]} />
           </View>
 
           <CalmButton
-            title="Enter as Guest"
+            title="Continue as Guest"
             variant="secondary"
             onPress={handleContinue}
             style={styles.button}
           />
-        </View>
+        </Animated.View>
 
-        <Text style={styles.privacyNote}>
-          Your reflections are yours. Always.
-        </Text>
+        <Animated.Text
+          entering={FadeIn.delay(500).duration(600)}
+          style={[styles.privacyNote, { color: colors.mutedForeground }]}
+        >
+          Your reflections are private and encrypted.{"\n"}We never sell your data.
+        </Animated.Text>
       </View>
     </AtmosphericBackground>
   );
@@ -59,48 +86,55 @@ export default function AuthScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    paddingHorizontal: 24,
+    paddingHorizontal: 28,
     justifyContent: "space-between",
   },
   header: {
     alignItems: "center",
-    marginTop: 40,
+    gap: 8,
   },
   logo: {
-    fontSize: 42,
-    marginBottom: 16,
+    fontSize: 46,
+    marginBottom: 4,
+  },
+  tagline: {
+    fontFamily: "DMSans_400Regular",
+    fontSize: 14,
+    letterSpacing: 2,
+    marginBottom: 20,
   },
   subtitle: {
     fontFamily: "DMSans_400Regular",
-    fontSize: 18,
-    color: "#C8C5BE",
+    fontSize: 17,
+    lineHeight: 26,
+    textAlign: "center",
   },
   buttons: {
     width: "100%",
   },
   button: {
-    marginBottom: 16,
+    marginBottom: 12,
   },
   separator: {
     flexDirection: "row",
     alignItems: "center",
-    marginVertical: 24,
+    marginVertical: 20,
   },
   line: {
     flex: 1,
     height: 1,
-    backgroundColor: "#252840",
   },
   separatorText: {
-    fontFamily: "DMSans_500Medium",
-    color: "#8A8882",
+    fontFamily: "DMSans_400Regular",
+    fontSize: 13,
     paddingHorizontal: 16,
+    letterSpacing: 0.3,
   },
   privacyNote: {
     fontFamily: "DMSans_400Regular",
-    fontSize: 14,
-    color: "#8A8882",
+    fontSize: 13,
     textAlign: "center",
-    marginTop: 32,
+    lineHeight: 20,
+    opacity: 0.7,
   },
 });

@@ -5,6 +5,7 @@ import Animated, {
   useAnimatedStyle,
   useSharedValue,
   withSpring,
+  withTiming,
 } from "react-native-reanimated";
 import * as Haptics from "expo-haptics";
 import { useColors } from "@/hooks/useColors";
@@ -14,27 +15,39 @@ const AnimatedPressable = Animated.createAnimatedComponent(Pressable);
 interface CalmButtonProps {
   onPress: () => void;
   title: string;
-  variant?: "primary" | "secondary";
+  variant?: "primary" | "secondary" | "ghost";
   style?: ViewStyle;
+  disabled?: boolean;
 }
 
-export function CalmButton({ onPress, title, variant = "primary", style }: CalmButtonProps) {
+export function CalmButton({
+  onPress,
+  title,
+  variant = "primary",
+  style,
+  disabled = false,
+}: CalmButtonProps) {
   const colors = useColors();
   const scale = useSharedValue(1);
+  const opacity = useSharedValue(1);
 
   const animatedStyle = useAnimatedStyle(() => ({
     transform: [{ scale: scale.value }],
+    opacity: opacity.value,
   }));
 
   const handlePressIn = () => {
-    scale.value = withSpring(0.97, { damping: 15, stiffness: 200 });
+    scale.value = withSpring(0.96, { damping: 18, stiffness: 260 });
+    opacity.value = withTiming(0.88, { duration: 80 });
   };
 
   const handlePressOut = () => {
-    scale.value = withSpring(1, { damping: 15, stiffness: 200 });
+    scale.value = withSpring(1, { damping: 15, stiffness: 220 });
+    opacity.value = withTiming(1, { duration: 120 });
   };
 
   const handlePress = () => {
+    if (disabled) return;
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
     onPress();
   };
@@ -45,6 +58,7 @@ export function CalmButton({ onPress, title, variant = "primary", style }: CalmB
         onPress={handlePress}
         onPressIn={handlePressIn}
         onPressOut={handlePressOut}
+        disabled={disabled}
         style={[
           styles.secondaryButton,
           { borderColor: colors.border },
@@ -59,15 +73,30 @@ export function CalmButton({ onPress, title, variant = "primary", style }: CalmB
     );
   }
 
+  if (variant === "ghost") {
+    return (
+      <AnimatedPressable
+        onPress={handlePress}
+        onPressIn={handlePressIn}
+        onPressOut={handlePressOut}
+        disabled={disabled}
+        style={[styles.ghostButton, animatedStyle, style]}
+      >
+        <Text style={[styles.ghostText, { color: colors.primary }]}>{title}</Text>
+      </AnimatedPressable>
+    );
+  }
+
   return (
     <AnimatedPressable
       onPress={handlePress}
       onPressIn={handlePressIn}
       onPressOut={handlePressOut}
-      style={[styles.container, animatedStyle, style]}
+      disabled={disabled}
+      style={[styles.container, animatedStyle, style, disabled && { opacity: 0.5 }]}
     >
       <LinearGradient
-        colors={["#7B7FF0", "#5B5FD0"]}
+        colors={["#8285F0", "#6063D8"]}
         style={styles.gradient}
         start={{ x: 0, y: 0 }}
         end={{ x: 1, y: 1 }}
@@ -80,31 +109,44 @@ export function CalmButton({ onPress, title, variant = "primary", style }: CalmB
 
 const styles = StyleSheet.create({
   container: {
-    borderRadius: 28,
+    borderRadius: 30,
     overflow: "hidden",
   },
   gradient: {
-    paddingVertical: 18,
+    paddingVertical: 17,
     paddingHorizontal: 32,
     alignItems: "center",
     justifyContent: "center",
   },
   primaryText: {
-    fontFamily: "DMSans_600SemiBold",
+    fontFamily: "DMSans_500Medium",
     fontSize: 16,
     color: "#F5F3EE",
+    letterSpacing: 0.3,
   },
   secondaryButton: {
-    paddingVertical: 18,
+    paddingVertical: 17,
     paddingHorizontal: 32,
     alignItems: "center",
     justifyContent: "center",
-    borderRadius: 28,
+    borderRadius: 30,
     borderWidth: 1,
     backgroundColor: "transparent",
   },
   secondaryText: {
-    fontFamily: "DMSans_500Medium",
+    fontFamily: "DMSans_400Regular",
     fontSize: 16,
+    letterSpacing: 0.2,
+  },
+  ghostButton: {
+    paddingVertical: 12,
+    paddingHorizontal: 20,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  ghostText: {
+    fontFamily: "DMSans_500Medium",
+    fontSize: 15,
+    letterSpacing: 0.2,
   },
 });

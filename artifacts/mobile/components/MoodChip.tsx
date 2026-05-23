@@ -1,5 +1,5 @@
 import React from "react";
-import { Pressable, StyleSheet, Text, ViewStyle } from "react-native";
+import { Pressable, StyleSheet, Text, ViewStyle, Platform } from "react-native";
 import Animated, {
   useAnimatedStyle,
   useSharedValue,
@@ -25,26 +25,28 @@ export function MoodChip({ label, selected = false, onPress, style }: MoodChipPr
   const animatedStyle = useAnimatedStyle(() => ({
     transform: [{ scale: scale.value }],
     backgroundColor: selected
-      ? withTiming(colors.primary, { duration: 200 })
-      : withTiming(colors.card, { duration: 200 }),
+      ? withTiming(colors.primary + "28", { duration: 250 })
+      : withTiming(colors.card, { duration: 250 }),
     borderColor: selected
-      ? withTiming(colors.primary, { duration: 200 })
-      : withTiming(colors.border, { duration: 200 }),
+      ? withTiming(colors.primary + "70", { duration: 250 })
+      : withTiming(colors.border, { duration: 250 }),
   }));
 
   const handlePressIn = () => {
-    scale.value = withSpring(0.95);
+    scale.value = withSpring(0.94, { damping: 20, stiffness: 300 });
   };
 
   const handlePressOut = () => {
-    scale.value = withSpring(selected ? 1.06 : 1);
+    scale.value = withSpring(1, { damping: 14, stiffness: 200 });
   };
 
   const handlePress = () => {
-    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    if (Platform.OS !== "web") {
+      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    }
     onPress();
-    scale.value = withSpring(1.06, {}, () => {
-      scale.value = withSpring(1);
+    scale.value = withSpring(1.05, { damping: 12 }, () => {
+      scale.value = withSpring(1, { damping: 14 });
     });
   };
 
@@ -59,8 +61,8 @@ export function MoodChip({ label, selected = false, onPress, style }: MoodChipPr
         style={[
           styles.text,
           {
-            color: selected ? colors.primaryForeground : colors.foreground,
-            fontFamily: selected ? "DMSans_600SemiBold" : "DMSans_400Regular",
+            color: selected ? colors.primary : colors.secondaryForeground,
+            fontFamily: selected ? "DMSans_500Medium" : "DMSans_400Regular",
           },
         ]}
       >
@@ -72,15 +74,16 @@ export function MoodChip({ label, selected = false, onPress, style }: MoodChipPr
 
 const styles = StyleSheet.create({
   container: {
-    paddingVertical: 12,
-    paddingHorizontal: 20,
-    borderRadius: 24,
+    paddingVertical: 10,
+    paddingHorizontal: 18,
+    borderRadius: 30,
     borderWidth: 1,
     marginRight: 8,
     marginBottom: 8,
     alignSelf: "flex-start",
   },
   text: {
-    fontSize: 15,
+    fontSize: 14,
+    letterSpacing: 0.1,
   },
 });
