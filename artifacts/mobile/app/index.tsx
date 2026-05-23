@@ -1,13 +1,14 @@
 import { Redirect } from "expo-router";
-import { useAppContext } from "@/context/AppContext";
 import { View } from "react-native";
-import { AtmosphericBackground } from "@/components/AtmosphericBackground";
+
+import { useAppContext } from "@/context/AppContext";
 
 export default function IndexScreen() {
   const { onboardingComplete, isReady } = useAppContext();
 
   if (!isReady) {
-    return <AtmosphericBackground />;
+    // Minimal dark view — avoids loading AtmosphericBackground before fonts are ready
+    return <View style={{ flex: 1, backgroundColor: "#0A0B18" }} />;
   }
 
   if (onboardingComplete) {

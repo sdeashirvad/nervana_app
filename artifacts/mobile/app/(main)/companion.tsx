@@ -1,13 +1,38 @@
-import React, { useState, useEffect, useRef } from "react";
-import { StyleSheet, View, Text, FlatList, TextInput, Pressable } from "react-native";
+import React, { useState, useEffect } from "react";
+import {
+  StyleSheet,
+  View,
+  Text,
+  FlatList,
+  TextInput,
+  Pressable,
+  KeyboardAvoidingView,
+  Platform,
+} from "react-native";
 import { AtmosphericBackground } from "@/components/AtmosphericBackground";
 import { GlowText } from "@/components/GlowText";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useColors } from "@/hooks/useColors";
 import { Feather } from "@expo/vector-icons";
-import { KeyboardAvoidingView } from "react-native-keyboard-controller";
 import { mockConversation } from "@/data/mock";
-import Animated, { useSharedValue, useAnimatedStyle, withRepeat, withTiming, withDelay } from "react-native-reanimated";
+import Animated, {
+  useSharedValue,
+  useAnimatedStyle,
+  withRepeat,
+  withTiming,
+  withDelay,
+} from "react-native-reanimated";
+
+const MOCK_RESPONSES = [
+  "It sounds like there's a lot of pressure underneath that.",
+  "What would it mean for you if things didn't improve right away?",
+  "That makes complete sense given what you've been carrying.",
+  "You're asking the right questions — even if the answers aren't clear yet.",
+  "Sometimes naming the feeling is enough for today.",
+  "There's a difference between what you did and who you are.",
+  "Rest is not a reward for productivity. It's a need.",
+  "Carrying too much for too long quietly reshapes you. It's okay to put some of it down.",
+];
 
 function TypingIndicator() {
   const colors = useColors();
@@ -27,70 +52,89 @@ function TypingIndicator() {
 
   return (
     <View style={styles.typingContainer}>
-      <Animated.View style={[styles.dot, s1, { backgroundColor: colors.foreground }]} />
-      <Animated.View style={[styles.dot, s2, { backgroundColor: colors.foreground }]} />
-      <Animated.View style={[styles.dot, s3, { backgroundColor: colors.foreground }]} />
+      <Animated.View style={[styles.typingDot, s1, { backgroundColor: colors.mutedForeground }]} />
+      <Animated.View style={[styles.typingDot, s2, { backgroundColor: colors.mutedForeground }]} />
+      <Animated.View style={[styles.typingDot, s3, { backgroundColor: colors.mutedForeground }]} />
     </View>
   );
 }
 
+type Message = {
+  id: string;
+  role: string;
+  text: string;
+  timestamp: string;
+};
+
 export default function CompanionScreen() {
   const insets = useSafeAreaInsets();
   const colors = useColors();
-  const [messages, setMessages] = useState(mockConversation.slice().reverse()); // inverted
+
+  const [messages, setMessages] = useState<Message[]>(
+    [...mockConversation].reverse()
+  );
   const [input, setInput] = useState("");
   const [isTyping, setIsTyping] = useState(false);
 
-  const mockResponses = [
-    "It sounds like there's a lot of pressure underneath that.",
-    "What would it mean for you if things didn't improve right away?",
-    "That makes complete sense given what you've been carrying.",
-    "You're asking the right questions — even if the answers aren't clear yet.",
-    "Sometimes naming the feeling is enough for today.",
-    "There's a difference between what you did and who you are.",
-  ];
+  const topPad = Platform.OS === "web" ? 67 : insets.top + 20;
+  const bottomPad = Platform.OS === "web" ? 34 : insets.bottom + 88;
 
   const handleSend = () => {
-    if (!input.trim()) return;
+    const trimmed = input.trim();
+    if (!trimmed) return;
 
-    const newMessage = {
+    const userMsg: Message = {
       id: Date.now().toString(),
       role: "user",
-      text: input.trim(),
-      timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+      text: trimmed,
+      timestamp: new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }),
     };
 
-    setMessages(prev => [newMessage, ...prev]);
+    setMessages((prev) => [userMsg, ...prev]);
     setInput("");
     setIsTyping(true);
 
+    const delay = 1500 + Math.random() * 800;
     setTimeout(() => {
-      const response = {
+      const responseMsg: Message = {
         id: (Date.now() + 1).toString(),
         role: "assistant",
-        text: mockResponses[Math.floor(Math.random() * mockResponses.length)],
-        timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+        text: MOCK_RESPONSES[Math.floor(Math.random() * MOCK_RESPONSES.length)] ?? MOCK_RESPONSES[0],
+        timestamp: new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }),
       };
-      setMessages(prev => [response, ...prev]);
+      setMessages((prev) => [responseMsg, ...prev]);
       setIsTyping(false);
-    }, 2000);
+    }, delay);
   };
 
-  const renderItem = ({ item }: { item: typeof mockConversation[0] }) => {
+  const renderItem = ({ item }: { item: Message }) => {
     const isUser = item.role === "user";
-
     return (
-      <View style={[styles.messageRow, isUser ? styles.messageRowUser : styles.messageRowAssistant]}>
-        <View 
+      <View
+        style={[
+          styles.messageRow,
+          isUser ? styles.messageRowUser : styles.messageRowAssistant,
+        ]}
+      >
+        <View
           style={[
-            styles.bubble, 
-            isUser ? { backgroundColor: colors.primary + "33" } : { backgroundColor: colors.card }
+            styles.bubble,
+            isUser
+              ? { backgroundColor: colors.primary + "22", borderColor: colors.primary + "30", borderWidth: 1 }
+              : { backgroundColor: colors.card },
           ]}
         >
-          <Text style={styles.messageText}>{item.text}</Text>
+          <Text style={[styles.messageText, { color: colors.foreground }]}>
+            {item.text ?? ""}
+          </Text>
         </View>
-        <Text style={[styles.timestamp, { alignSelf: isUser ? "flex-end" : "flex-start" }]}>
-          {item.timestamp}
+        <Text
+          style={[
+            styles.timestamp,
+            { color: colors.mutedForeground, alignSelf: isUser ? "flex-end" : "flex-start" },
+          ]}
+        >
+          {item.timestamp ?? ""}
         </Text>
       </View>
     );
@@ -98,22 +142,24 @@ export default function CompanionScreen() {
 
   return (
     <AtmosphericBackground>
-      <View style={[styles.header, { paddingTop: insets.top + 20 }]}>
+      <View style={[styles.header, { paddingTop: topPad, borderBottomColor: colors.border }]}>
         <GlowText style={styles.title}>Your Companion</GlowText>
-        <Text style={styles.subtitle}>A quiet space to process</Text>
+        <Text style={[styles.subtitle, { color: colors.mutedForeground }]}>
+          A quiet space to process
+        </Text>
       </View>
 
       <KeyboardAvoidingView
         style={styles.flex}
-        behavior="padding"
+        behavior={Platform.OS === "ios" ? "padding" : "height"}
         keyboardVerticalOffset={0}
       >
         <FlatList
           data={messages}
           inverted
-          keyExtractor={item => item.id}
+          keyExtractor={(item) => item.id}
           renderItem={renderItem}
-          contentContainerStyle={{ paddingHorizontal: 20, paddingBottom: 20 }}
+          contentContainerStyle={styles.list}
           keyboardDismissMode="interactive"
           keyboardShouldPersistTaps="handled"
           ListHeaderComponent={
@@ -127,8 +173,22 @@ export default function CompanionScreen() {
           }
         />
 
-        <View style={[styles.inputContainer, { paddingBottom: insets.bottom + 100, backgroundColor: colors.background }]}>
-          <View style={[styles.inputWrapper, { borderColor: colors.border, backgroundColor: colors.input }]}>
+        <View
+          style={[
+            styles.inputContainer,
+            {
+              paddingBottom: bottomPad,
+              backgroundColor: colors.background,
+              borderTopColor: colors.border,
+            },
+          ]}
+        >
+          <View
+            style={[
+              styles.inputWrapper,
+              { borderColor: colors.border, backgroundColor: colors.input },
+            ]}
+          >
             <TextInput
               style={[styles.input, { color: colors.foreground }]}
               placeholder="Share what's on your mind..."
@@ -136,9 +196,14 @@ export default function CompanionScreen() {
               value={input}
               onChangeText={setInput}
               multiline
+              onSubmitEditing={handleSend}
             />
-            <Pressable onPress={handleSend} style={styles.sendBtn}>
-              <Feather name="send" size={20} color={input.trim() ? colors.primary : colors.mutedForeground} />
+            <Pressable onPress={handleSend} style={styles.sendBtn} hitSlop={8}>
+              <Feather
+                name="send"
+                size={20}
+                color={input.trim() ? colors.primary : colors.mutedForeground}
+              />
             </Pressable>
           </View>
         </View>
@@ -148,48 +213,27 @@ export default function CompanionScreen() {
 }
 
 const styles = StyleSheet.create({
-  flex: {
-    flex: 1,
-  },
+  flex: { flex: 1 },
   header: {
-    paddingHorizontal: 20,
-    paddingBottom: 20,
+    paddingHorizontal: 22,
+    paddingBottom: 18,
     borderBottomWidth: 1,
-    borderBottomColor: "#252840",
   },
-  title: {
-    fontSize: 28,
-  },
-  subtitle: {
-    fontFamily: "DMSans_400Regular",
-    fontSize: 14,
-    color: "#8A8882",
-    marginTop: 4,
-  },
-  messageRow: {
-    marginBottom: 16,
-    maxWidth: "80%",
-  },
-  messageRowUser: {
-    alignSelf: "flex-end",
-  },
-  messageRowAssistant: {
-    alignSelf: "flex-start",
-  },
-  bubble: {
-    padding: 16,
-    borderRadius: 20,
-  },
+  title: { fontSize: 28 },
+  subtitle: { fontFamily: "DMSans_400Regular", fontSize: 14, marginTop: 4 },
+  list: { paddingHorizontal: 20, paddingBottom: 16 },
+  messageRow: { marginBottom: 14, maxWidth: "80%" },
+  messageRowUser: { alignSelf: "flex-end" },
+  messageRowAssistant: { alignSelf: "flex-start" },
+  bubble: { padding: 16, borderRadius: 20 },
   messageText: {
     fontFamily: "DMSans_400Regular",
     fontSize: 15,
-    color: "#F5F3EE",
     lineHeight: 22,
   },
   timestamp: {
     fontFamily: "DMSans_400Regular",
     fontSize: 11,
-    color: "#8A8882",
     marginTop: 4,
     paddingHorizontal: 4,
   },
@@ -197,7 +241,6 @@ const styles = StyleSheet.create({
     paddingHorizontal: 20,
     paddingTop: 12,
     borderTopWidth: 1,
-    borderTopColor: "#252840",
   },
   inputWrapper: {
     flexDirection: "row",
@@ -212,22 +255,15 @@ const styles = StyleSheet.create({
     fontFamily: "DMSans_400Regular",
     fontSize: 15,
     maxHeight: 120,
-    minHeight: 32,
+    minHeight: 36,
     paddingTop: 8,
   },
-  sendBtn: {
-    padding: 8,
-    marginBottom: 4,
-  },
+  sendBtn: { padding: 8, marginBottom: 2 },
   typingContainer: {
     flexDirection: "row",
     alignItems: "center",
     height: 22,
-    gap: 4,
+    gap: 5,
   },
-  dot: {
-    width: 6,
-    height: 6,
-    borderRadius: 3,
-  },
+  typingDot: { width: 6, height: 6, borderRadius: 3 },
 });

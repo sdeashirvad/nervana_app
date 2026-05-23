@@ -33,16 +33,18 @@ const queryClient = new QueryClient();
 
 function RootLayoutNav() {
   return (
-    <Stack screenOptions={{ headerShown: false, headerBackTitle: "Back" }}>
+    <Stack screenOptions={{ headerShown: false }}>
       <Stack.Screen name="index" />
       <Stack.Screen name="splash" />
       <Stack.Screen name="onboarding" />
       <Stack.Screen name="auth" />
       <Stack.Screen name="flow" />
       <Stack.Screen name="(main)" />
+      {/* (tabs) is a legacy scaffold group — redirects immediately to (main)/home */}
+      <Stack.Screen name="(tabs)" />
       <Stack.Screen name="checkin" options={{ presentation: "modal" }} />
-      <Stack.Screen name="notifications" options={{ presentation: "card" }} />
-      <Stack.Screen name="referral" options={{ presentation: "card" }} />
+      <Stack.Screen name="notifications" />
+      <Stack.Screen name="referral" />
     </Stack>
   );
 }
