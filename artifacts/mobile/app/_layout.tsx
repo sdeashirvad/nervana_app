@@ -42,6 +42,7 @@ function RootLayoutNav() {
       <Stack.Screen name="(main)" />
       {/* (tabs) is a legacy scaffold group — redirects immediately to (main)/home */}
       <Stack.Screen name="(tabs)" />
+      <Stack.Screen name="guest-name" />
       <Stack.Screen name="checkin" options={{ presentation: "modal" }} />
       <Stack.Screen name="notifications" />
       <Stack.Screen name="referral" />

@@ -33,6 +33,7 @@ export default function StrugglesScreen() {
 
   return (
     <OnboardingLayout
+      onBack={() => router.back()}
       footer={
         selected.length > 0 ? (
           <CalmButton

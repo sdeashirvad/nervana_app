@@ -26,6 +26,7 @@ export default function ProfessionScreen() {
 
   return (
     <OnboardingLayout
+      onBack={() => router.back()}
       footer={
         selected ? (
           <CalmButton

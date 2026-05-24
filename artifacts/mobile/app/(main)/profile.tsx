@@ -1,5 +1,5 @@
 import React from "react";
-import { StyleSheet, View, Text, ScrollView, Pressable, Platform } from "react-native";
+import { StyleSheet, View, Text, ScrollView, Pressable, Platform, Alert } from "react-native";
 import { useRouter } from "expo-router";
 import { AtmosphericBackground } from "@/components/AtmosphericBackground";
 import { PremiumCard } from "@/components/PremiumCard";
@@ -7,10 +7,10 @@ import { GlowText } from "@/components/GlowText";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useColors } from "@/hooks/useColors";
 import { Feather } from "@expo/vector-icons";
-import { mockUser } from "@/data/mock";
 import { LinearGradient } from "expo-linear-gradient";
 import { CalmButton } from "@/components/CalmButton";
 import Animated, { FadeInUp } from "react-native-reanimated";
+import { useAppContext } from "@/context/AppContext";
 
 const STATS = [
   { label: "day streak", value: "12" },
@@ -18,11 +18,41 @@ const STATS = [
   { label: "calm coins", value: "1,240" },
 ];
 
+function getInitials(name: string): string {
+  const parts = name.trim().split(/\s+/);
+  if (parts.length >= 2) {
+    return (parts[0][0] + parts[parts.length - 1][0]).toUpperCase();
+  }
+  return name.slice(0, 2).toUpperCase();
+}
+
 export default function ProfileScreen() {
   const router = useRouter();
   const insets = useSafeAreaInsets();
   const colors = useColors();
+  const { currentUser, logout } = useAppContext();
   const topPad = Platform.OS === "web" ? 64 : insets.top + 32;
+
+  const displayName = currentUser.name || "Guest";
+  const initials = getInitials(displayName);
+
+  const handleLogout = () => {
+    Alert.alert(
+      "Sign out",
+      "You'll be taken back to the welcome screen. Your local reflections will remain on this device.",
+      [
+        { text: "Cancel", style: "cancel" },
+        {
+          text: "Sign out",
+          style: "destructive",
+          onPress: async () => {
+            await logout();
+            router.replace("/");
+          },
+        },
+      ]
+    );
+  };
 
   return (
     <AtmosphericBackground>
@@ -42,11 +72,11 @@ export default function ProfileScreen() {
             start={{ x: 0, y: 0 }}
             end={{ x: 1, y: 1 }}
           >
-            <GlowText style={styles.avatarText}>AL</GlowText>
+            <GlowText style={styles.avatarText}>{initials}</GlowText>
           </LinearGradient>
-          <GlowText style={styles.name}>{mockUser.name}</GlowText>
+          <GlowText style={styles.name}>{displayName}</GlowText>
           <Text style={[styles.profession, { color: colors.secondaryForeground }]}>
-            {mockUser.profession}
+            {currentUser.profession || "Guest"}
           </Text>
           <Text style={[styles.memberSince, { color: colors.mutedForeground }]}>
             Member since November 2025
@@ -161,6 +191,27 @@ export default function ProfileScreen() {
           </PremiumCard>
         </Animated.View>
 
+        {/* Sign out */}
+        <Animated.View entering={FadeInUp.delay(520).duration(700)} style={styles.logoutWrapper}>
+          <Pressable
+            onPress={handleLogout}
+            style={({ pressed }) => [
+              styles.logoutBtn,
+              {
+                borderColor: pressed
+                  ? "rgba(255,80,80,0.30)"
+                  : "rgba(255,255,255,0.08)",
+                backgroundColor: pressed
+                  ? "rgba(255,80,80,0.06)"
+                  : "transparent",
+              },
+            ]}
+          >
+            <Feather name="log-out" size={15} color="rgba(255,100,100,0.70)" />
+            <Text style={styles.logoutText}>Sign out</Text>
+          </Pressable>
+        </Animated.View>
+
         <Text style={[styles.tagline, { color: "rgba(255,255,255,0.12)" }]}>
           your mental exhale
         </Text>
@@ -179,7 +230,7 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     marginBottom: 14,
   },
-  avatarText: { fontSize: 28, color: "#F0EDE8" },
+  avatarText: { fontSize: 26, color: "#F0EDE8" },
   name: { fontSize: 26, marginBottom: 4 },
   profession: { fontFamily: "DMSans_400Regular", fontSize: 15, marginBottom: 4 },
   memberSince: { fontFamily: "DMSans_400Regular", fontSize: 12, letterSpacing: 0.2 },
@@ -220,6 +271,22 @@ const styles = StyleSheet.create({
   rowRight: { flexDirection: "row", alignItems: "center", gap: 6 },
   rowValue: { fontFamily: "DMSans_400Regular", fontSize: 14 },
   divider: { height: 1, marginLeft: 20 },
+  logoutWrapper: { marginBottom: 28 },
+  logoutBtn: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    gap: 10,
+    paddingVertical: 16,
+    borderRadius: 18,
+    borderWidth: 1,
+  },
+  logoutText: {
+    fontFamily: "DMSans_400Regular",
+    fontSize: 15,
+    color: "rgba(255,100,100,0.70)",
+    letterSpacing: 0.2,
+  },
   tagline: {
     fontFamily: "DMSans_400Regular",
     fontSize: 13,

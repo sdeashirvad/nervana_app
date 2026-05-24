@@ -1,5 +1,5 @@
 import React from "react";
-import { StyleSheet, View, Text, Platform } from "react-native";
+import { StyleSheet, View, Text, Platform, Alert } from "react-native";
 import { useRouter } from "expo-router";
 import { AtmosphericBackground } from "@/components/AtmosphericBackground";
 import { CalmButton } from "@/components/CalmButton";
@@ -16,13 +16,22 @@ export default function AuthScreen() {
   const topPad = Platform.OS === "web" ? 80 : insets.top + 60;
   const bottomPad = Platform.OS === "web" ? 52 : insets.bottom + 44;
 
-  const handleContinue = () => router.push("/flow");
+  const handleComingSoon = () => {
+    Alert.alert(
+      "Coming Soon",
+      "We're working on this. For now, continue as a guest to explore Nervana.",
+      [{ text: "Got it", style: "default" }]
+    );
+  };
+
+  const handleGuest = () => {
+    router.push("/guest-name");
+  };
 
   return (
     <AtmosphericBackground>
       <View style={[styles.container, { paddingTop: topPad, paddingBottom: bottomPad }]}>
 
-        {/* Brand */}
         <Animated.View entering={FadeInUp.delay(60).duration(800)} style={styles.brand}>
           <GlowText style={styles.logo}>Nervana</GlowText>
           <Text style={[styles.tagline, { color: colors.mutedForeground }]}>
@@ -33,34 +42,32 @@ export default function AuthScreen() {
           </Text>
         </Animated.View>
 
-        {/* Buttons */}
         <Animated.View entering={FadeInUp.delay(260).duration(700)} style={styles.buttons}>
           <CalmButton
             title="Continue with Google"
-            onPress={handleContinue}
+            onPress={handleComingSoon}
             style={styles.button}
           />
           <CalmButton
             title="Continue with Email"
-            onPress={handleContinue}
+            onPress={handleComingSoon}
             style={styles.button}
           />
 
           <View style={styles.separator}>
-            <View style={styles.line} />
+            <View style={[styles.line, { backgroundColor: "rgba(255,255,255,0.07)" }]} />
             <Text style={[styles.orText, { color: colors.mutedForeground }]}>or</Text>
-            <View style={styles.line} />
+            <View style={[styles.line, { backgroundColor: "rgba(255,255,255,0.07)" }]} />
           </View>
 
           <CalmButton
             title="Continue as Guest"
             variant="secondary"
-            onPress={handleContinue}
+            onPress={handleGuest}
             style={styles.button}
           />
         </Animated.View>
 
-        {/* Privacy */}
         <Animated.View entering={FadeIn.delay(520).duration(700)}>
           <Text style={[styles.privacy, { color: colors.mutedForeground }]}>
             Your reflections are private and encrypted.{"\n"}We never sell your data.
@@ -100,7 +107,7 @@ const styles = StyleSheet.create({
     marginVertical: 20,
     gap: 14,
   },
-  line: { flex: 1, height: 1, backgroundColor: "rgba(255,255,255,0.07)" },
+  line: { flex: 1, height: 1 },
   orText: { fontFamily: "DMSans_400Regular", fontSize: 13, letterSpacing: 0.3 },
   privacy: {
     fontFamily: "DMSans_400Regular",

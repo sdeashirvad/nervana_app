@@ -12,7 +12,7 @@ export interface NervanaUser {
 
 const GUEST_USER: NervanaUser = {
   id: "guest-user",
-  name: "Alex",
+  name: "",
   profession: "Software Engineer",
   stressLevel: "High",
   emotionalGoals: ["Reduce burnout", "Sleep better"],
@@ -26,6 +26,7 @@ interface AppContextType {
   setCurrentUser: (updates: Partial<NervanaUser>) => void;
   todayCheckin: string | null;
   setTodayCheckin: (mood: string | null) => Promise<void>;
+  logout: () => Promise<void>;
   isReady: boolean;
 }
 
@@ -99,6 +100,21 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     }
   }, []);
 
+  const logout = useCallback(async () => {
+    try {
+      await Promise.all([
+        AsyncStorage.removeItem("nervana_onboarding_complete"),
+        AsyncStorage.removeItem("nervana_user"),
+        AsyncStorage.removeItem("nervana_today_checkin"),
+      ]);
+    } catch {
+      // Ignore storage errors — reset state regardless
+    }
+    setOnboardingCompleteState(false);
+    setCurrentUserState(GUEST_USER);
+    setTodayCheckinState(null);
+  }, []);
+
   return (
     <AppContext.Provider
       value={{
@@ -108,6 +124,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
         setCurrentUser,
         todayCheckin,
         setTodayCheckin,
+        logout,
         isReady,
       }}
     >
@@ -119,7 +136,6 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
 export function useAppContext(): AppContextType {
   const ctx = useContext(AppContext);
   if (!ctx) {
-    // Return safe defaults instead of throwing — prevents crashes outside provider
     return {
       onboardingComplete: false,
       setOnboardingComplete: async () => {},
@@ -127,6 +143,7 @@ export function useAppContext(): AppContextType {
       setCurrentUser: () => {},
       todayCheckin: null,
       setTodayCheckin: async () => {},
+      logout: async () => {},
       isReady: true,
     };
   }

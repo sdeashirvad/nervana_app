@@ -22,6 +22,7 @@ export default function StressScreen() {
 
   return (
     <OnboardingLayout
+      onBack={() => router.back()}
       footer={
         selected ? (
           <CalmButton

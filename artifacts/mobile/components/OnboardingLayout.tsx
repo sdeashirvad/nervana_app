@@ -1,28 +1,25 @@
 import React from "react";
-import { View, StyleSheet, Platform } from "react-native";
+import { View, StyleSheet, Platform, Pressable } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { AtmosphericBackground } from "@/components/AtmosphericBackground";
 import { KeyboardAwareScrollViewCompat } from "@/components/KeyboardAwareScrollViewCompat";
+import { Feather } from "@expo/vector-icons";
 
 interface OnboardingLayoutProps {
   children: React.ReactNode;
   footer?: React.ReactNode;
+  onBack?: () => void;
 }
 
 /**
  * Reusable wrapper for all onboarding / questionnaire screens.
  *
  * Layout contract:
- *   - AtmosphericBackground fills the screen
- *   - Header + content live inside a KeyboardAwareScrollView so they are
- *     always reachable on short devices or when the keyboard is open
- *   - The CTA (footer prop) is rendered OUTSIDE the scroll area and pinned
- *     above the home-indicator / navigation bar so it is always visible
- *
- * This eliminates the "Continue button off-screen" bug caused by
- * `flex: 1, justifyContent: "flex-end"` collapsing on small viewports.
+ *   - Optional back chevron in the top-left (outside scroll, always tappable)
+ *   - Header + content live inside a KeyboardAwareScrollView
+ *   - CTA (footer prop) is pinned below the scroll area — always visible
  */
-export function OnboardingLayout({ children, footer }: OnboardingLayoutProps) {
+export function OnboardingLayout({ children, footer, onBack }: OnboardingLayoutProps) {
   const insets = useSafeAreaInsets();
 
   const topPad = Platform.OS === "web" ? 48 : insets.top + 20;
@@ -31,10 +28,20 @@ export function OnboardingLayout({ children, footer }: OnboardingLayoutProps) {
   return (
     <AtmosphericBackground>
       <View style={styles.root}>
+        {onBack && (
+          <Pressable
+            onPress={onBack}
+            hitSlop={16}
+            style={[styles.backBtn, { top: topPad - 4 }]}
+          >
+            <Feather name="chevron-left" size={26} color="rgba(255,255,255,0.55)" />
+          </Pressable>
+        )}
+
         <KeyboardAwareScrollViewCompat
           contentContainerStyle={[
             styles.scrollContent,
-            { paddingTop: topPad, paddingBottom: 20 },
+            { paddingTop: onBack ? topPad + 36 : topPad, paddingBottom: 20 },
           ]}
           showsVerticalScrollIndicator={false}
           bounces
@@ -45,12 +52,7 @@ export function OnboardingLayout({ children, footer }: OnboardingLayoutProps) {
         </KeyboardAwareScrollViewCompat>
 
         {footer != null && (
-          <View
-            style={[
-              styles.footer,
-              { paddingBottom: bottomInset + 16 },
-            ]}
-          >
+          <View style={[styles.footer, { paddingBottom: bottomInset + 16 }]}>
             {footer}
           </View>
         )}
@@ -62,6 +64,12 @@ export function OnboardingLayout({ children, footer }: OnboardingLayoutProps) {
 const styles = StyleSheet.create({
   root: {
     flex: 1,
+  },
+  backBtn: {
+    position: "absolute",
+    left: 20,
+    zIndex: 10,
+    padding: 4,
   },
   scrollContent: {
     paddingHorizontal: 24,

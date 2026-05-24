@@ -36,6 +36,7 @@ export default function GoalsScreen() {
 
   return (
     <OnboardingLayout
+      onBack={() => router.back()}
       footer={
         selected.length > 0 ? (
           <CalmButton title="Enter Nervana" onPress={handleFinish} />
