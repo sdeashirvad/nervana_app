@@ -23,3 +23,21 @@ id = "hOGx6G9SToy1eU_463lO1"
 uri = "file://backend_implementation.md"
 type = "text"
 title = "Nervana — Backend Implementation Bible"
+
+[[outputs]]
+id = "FO733otVvTqkvOtlYndJ2"
+uri = "file://README.md"
+type = "text"
+title = "README.md — Developer Onboarding Guide"
+
+[[outputs]]
+id = "h2ENNBeylFqORSFaOBiH_"
+uri = "file://tech_debt.md"
+type = "text"
+title = "tech_debt.md — Master Engineering Checklist"
+
+[[outputs]]
+id = "umQh8fDp4ypCQ6XiKxYjF"
+uri = "file://frontend_repointing.md"
+type = "text"
+title = "frontend_repointing.md — API Integration Guide"
