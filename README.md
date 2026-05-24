@@ -425,77 +425,67 @@ These compile the native app locally — requires Xcode / Android Studio fully c
 
 ## 9. Android Build Instructions
 
-### Development APK (for testing)
+> **Critical:** All `eas` commands must be run from inside the `artifacts/mobile/` directory — **not** from the repo root. Running from the repo root picks up the wrong `package.json` (named "workspace") and produces a broken build named "workspace" with a generic Android icon.
 
-Install EAS CLI:
+### Understanding the Three Build Profiles
+
+There are three profiles in `eas.json`. Choosing the wrong one is the most common mistake:
+
+| Profile | What it produces | Can run standalone? | Use case |
+|---|---|---|---|
+| `development` | Dev-client shell — shows "Development Servers" screen | **No** — needs a live Metro server | Only for Expo devs actively debugging |
+| `preview` | Self-contained `.apk` | **Yes** — install and run directly | Sharing with testers, demos, QA |
+| `production` | `.aab` (App Bundle) | Not directly — needs Play Store | Play Store submission |
+
+**If your APK shows a "Development Servers" screen asking for `npx expo start` — you built with the `development` profile. Use `preview` instead.**
+
+### Step 1 — Install EAS CLI and log in (one-time setup)
 
 ```bash
 npm install -g eas-cli
 eas login
 ```
 
-Build a development APK:
+Log in with your Expo account (`sdeashirvad`). You only need to do this once per machine.
+
+### Step 2 — Navigate to the mobile app directory
 
 ```bash
-eas build --profile development --platform android
+# Always run EAS commands from here — never from the repo root
+cd artifacts/mobile
 ```
 
-Download the `.apk` from the EAS dashboard and install on a device with:
-
-```bash
-adb install nervana-dev.apk
-```
-
-### Preview Build (internal testing / QA)
+### Step 3 — Build a shareable APK (preview profile)
 
 ```bash
 eas build --profile preview --platform android
 ```
 
-Share the QR code from the EAS build page with testers. They install it directly on their Android device.
+- EAS builds in the cloud (no Android SDK needed locally)
+- Takes ~5–15 minutes
+- When done, the EAS dashboard shows a download link for the `.apk`
+- Install directly on any Android device (enable "Install from unknown sources" in settings)
+
+### Step 4 — Install on device
+
+Download the `.apk` from the EAS dashboard link, then either:
+
+```bash
+# Via ADB (if device is connected via USB)
+adb install nervana-preview.apk
+```
+
+Or simply open the download link on the Android device and tap to install.
 
 ### Production Build (Play Store)
 
 ```bash
+cd artifacts/mobile
 eas build --profile production --platform android
-```
-
-This generates a signed `.aab` (Android App Bundle) for Play Store submission.
-
-Submit directly to Play Store:
-
-```bash
 eas submit --platform android
 ```
 
-### Configure `eas.json`
-
-```json
-{
-  "build": {
-    "development": {
-      "developmentClient": true,
-      "distribution": "internal",
-      "env": { "APP_ENV": "development" }
-    },
-    "preview": {
-      "distribution": "internal",
-      "env": { "APP_ENV": "staging" }
-    },
-    "production": {
-      "env": { "APP_ENV": "production" }
-    }
-  }
-}
-```
-
-### Local Android Build (without EAS)
-
-```bash
-npx expo run:android --variant release
-```
-
-Requires the Android SDK and a local keystore. EAS is preferred for production builds.
+Generates a signed `.aab` (Android App Bundle) and submits to Play Store.
 
 ---
 

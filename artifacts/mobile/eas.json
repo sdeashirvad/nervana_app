@@ -5,16 +5,19 @@
   },
   "build": {
     "development": {
+      "_comment": "DO NOT use this for sharing. This creates a dev-client shell that requires a running Metro server — it is NOT a standalone app.",
       "developmentClient": true,
       "distribution": "internal"
     },
     "preview": {
+      "_comment": "USE THIS for sharing/testing. Creates a self-contained APK that works without any server.",
       "distribution": "internal",
       "android": {
         "buildType": "apk"
       }
     },
     "production": {
+      "_comment": "For Play Store submission. Creates an AAB (not directly installable).",
       "android": {
         "buildType": "app-bundle"
       }
