@@ -1,12 +1,5 @@
 import React from "react";
-import {
-  StyleSheet,
-  View,
-  Text,
-  FlatList,
-  Pressable,
-  Platform,
-} from "react-native";
+import { StyleSheet, View, Text, FlatList, Pressable, Platform } from "react-native";
 import { useRouter } from "expo-router";
 import { AtmosphericBackground } from "@/components/AtmosphericBackground";
 import { GlowText } from "@/components/GlowText";
@@ -20,16 +13,16 @@ type NotifItem = (typeof mockNotifications)[0];
 
 function NotifRow({ item, index }: { item: NotifItem; index: number }) {
   const colors = useColors();
-  const isUnread = !item.read;
+  const unread = !item.read;
 
   return (
-    <Animated.View entering={FadeInUp.delay(index * 60).duration(450)}>
+    <Animated.View entering={FadeInUp.delay(index * 55).duration(480)}>
       <View
         style={[
           styles.item,
           {
-            borderBottomColor: colors.border,
-            backgroundColor: isUnread ? colors.card + "CC" : "transparent",
+            borderBottomColor: "rgba(255,255,255,0.06)",
+            backgroundColor: unread ? "rgba(148,145,240,0.05)" : "transparent",
           },
         ]}
       >
@@ -37,40 +30,40 @@ function NotifRow({ item, index }: { item: NotifItem; index: number }) {
           style={[
             styles.iconWrap,
             {
-              backgroundColor: isUnread
-                ? colors.primary + "18"
-                : colors.secondary,
+              backgroundColor: unread
+                ? "rgba(148,145,240,0.12)"
+                : "rgba(255,255,255,0.04)",
             },
           ]}
         >
           <Feather
             name="wind"
-            size={16}
-            color={isUnread ? colors.primary : colors.mutedForeground}
+            size={15}
+            color={unread ? colors.primary : "rgba(255,255,255,0.30)"}
           />
         </View>
-        <View style={styles.content}>
-          <View style={styles.row}>
+        <View style={styles.itemContent}>
+          <View style={styles.itemRow}>
             <Text
               style={[
-                styles.title,
+                styles.itemTitle,
                 {
-                  color: isUnread ? colors.foreground : colors.secondaryForeground,
-                  fontFamily: isUnread ? "DMSans_500Medium" : "DMSans_400Regular",
+                  color: unread ? colors.foreground : colors.secondaryForeground,
+                  fontFamily: unread ? "DMSans_500Medium" : "DMSans_400Regular",
                 },
               ]}
             >
               {item.title}
             </Text>
-            <Text style={[styles.time, { color: colors.mutedForeground }]}>
+            <Text style={[styles.itemTime, { color: colors.mutedForeground }]}>
               {item.time}
             </Text>
           </View>
-          <Text style={[styles.body, { color: colors.mutedForeground }]}>
+          <Text style={[styles.itemBody, { color: colors.mutedForeground }]}>
             {item.body}
           </Text>
         </View>
-        {isUnread && (
+        {unread && (
           <View style={[styles.unreadDot, { backgroundColor: colors.primary }]} />
         )}
       </View>
@@ -83,29 +76,21 @@ export default function NotificationsScreen() {
   const insets = useSafeAreaInsets();
   const colors = useColors();
   const topPad = Platform.OS === "web" ? 64 : insets.top + 20;
-
   const unreadCount = mockNotifications.filter((n) => !n.read).length;
-
-  const renderItem = ({ item, index }: { item: NotifItem; index: number }) => (
-    <NotifRow item={item} index={index} />
-  );
 
   return (
     <AtmosphericBackground>
       <Animated.View
-        entering={FadeInUp.delay(40).duration(500)}
-        style={[
-          styles.header,
-          { paddingTop: topPad, borderBottomColor: colors.border },
-        ]}
+        entering={FadeInUp.delay(40).duration(600)}
+        style={[styles.header, { paddingTop: topPad, borderBottomColor: "rgba(255,255,255,0.06)" }]}
       >
-        <Pressable onPress={() => router.back()} style={styles.backBtn} hitSlop={12}>
-          <Feather name="chevron-left" size={26} color={colors.foreground} />
+        <Pressable onPress={() => router.back()} style={styles.backBtn} hitSlop={14}>
+          <Feather name="chevron-left" size={25} color={"rgba(255,255,255,0.55)"} />
         </Pressable>
         <View style={styles.headerCenter}>
           <GlowText style={styles.headerTitle}>Pauses & reminders</GlowText>
           {unreadCount > 0 && (
-            <Text style={[styles.unreadBadge, { color: colors.primary }]}>
+            <Text style={[styles.unreadCount, { color: colors.primary }]}>
               {unreadCount} new
             </Text>
           )}
@@ -116,14 +101,11 @@ export default function NotificationsScreen() {
       <FlatList
         data={mockNotifications}
         keyExtractor={(item) => item.id}
-        renderItem={renderItem}
-        contentContainerStyle={{
-          paddingTop: 8,
-          paddingBottom: insets.bottom + 40,
-        }}
+        renderItem={({ item, index }) => <NotifRow item={item} index={index} />}
+        contentContainerStyle={{ paddingTop: 4, paddingBottom: insets.bottom + 40 }}
         showsVerticalScrollIndicator={false}
         ListEmptyComponent={
-          <View style={styles.emptyState}>
+          <View style={styles.empty}>
             <Text style={[styles.emptyText, { color: colors.mutedForeground }]}>
               You're all caught up.{"\n"}We'll reach out gently.
             </Text>
@@ -145,53 +127,35 @@ const styles = StyleSheet.create({
   },
   backBtn: { padding: 8 },
   headerCenter: { alignItems: "center" },
-  headerTitle: { fontSize: 22 },
-  unreadBadge: {
-    fontFamily: "DMSans_400Regular",
-    fontSize: 12,
-    marginTop: 2,
-    letterSpacing: 0.2,
-  },
+  headerTitle: { fontSize: 21 },
+  unreadCount: { fontFamily: "DMSans_400Regular", fontSize: 12, marginTop: 2 },
   item: {
     flexDirection: "row",
-    paddingHorizontal: 20,
+    paddingHorizontal: 22,
     paddingVertical: 18,
     borderBottomWidth: 1,
     alignItems: "flex-start",
     position: "relative",
   },
   iconWrap: {
-    width: 34,
-    height: 34,
-    borderRadius: 17,
+    width: 33,
+    height: 33,
+    borderRadius: 16.5,
     alignItems: "center",
     justifyContent: "center",
     marginRight: 14,
     marginTop: 1,
   },
-  content: { flex: 1 },
-  row: {
+  itemContent: { flex: 1 },
+  itemRow: {
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "flex-start",
     marginBottom: 5,
   },
-  title: {
-    fontSize: 15,
-    flex: 1,
-    lineHeight: 21,
-  },
-  time: {
-    fontFamily: "DMSans_400Regular",
-    fontSize: 12,
-    marginLeft: 10,
-    marginTop: 2,
-  },
-  body: {
-    fontFamily: "DMSans_400Regular",
-    fontSize: 14,
-    lineHeight: 21,
-  },
+  itemTitle: { fontSize: 15, flex: 1, lineHeight: 21 },
+  itemTime: { fontFamily: "DMSans_400Regular", fontSize: 12, marginLeft: 10, marginTop: 2 },
+  itemBody: { fontFamily: "DMSans_400Regular", fontSize: 14, lineHeight: 21 },
   unreadDot: {
     width: 6,
     height: 6,
@@ -200,10 +164,7 @@ const styles = StyleSheet.create({
     right: 16,
     top: 22,
   },
-  emptyState: {
-    paddingTop: 80,
-    alignItems: "center",
-  },
+  empty: { paddingTop: 80, alignItems: "center" },
   emptyText: {
     fontFamily: "DMSans_400Regular",
     fontSize: 16,

@@ -16,43 +16,38 @@ import Animated, {
   Easing,
 } from "react-native-reanimated";
 
-function AnimatedBar({
-  score,
-  index,
-  colors,
-}: {
-  score: number;
-  index: number;
-  colors: any;
-}) {
-  const height = useSharedValue(0);
-
+function AnimatedBar({ score, index, colors }: { score: number; index: number; colors: any }) {
+  const h = useSharedValue(0);
   useEffect(() => {
-    height.value = withDelay(
-      200 + index * 80,
-      withTiming((score / 5) * 100, {
-        duration: 800,
-        easing: Easing.out(Easing.cubic),
-      })
+    h.value = withDelay(
+      200 + index * 90,
+      withTiming((score / 5) * 100, { duration: 900, easing: Easing.out(Easing.cubic) })
     );
   }, []);
-
-  const barStyle = useAnimatedStyle(() => ({
-    height: `${height.value}%` as any,
+  const style = useAnimatedStyle(() => ({
+    height: `${h.value}%` as any,
     backgroundColor:
-      score >= 4
-        ? colors.primary
-        : score >= 3
-        ? colors.primary + "80"
-        : colors.primary + "45",
+      score >= 4 ? colors.primary : score >= 3 ? colors.primary + "88" : colors.primary + "42",
   }));
-
   return (
-    <View style={styles.barContainer}>
-      <Animated.View style={[styles.bar, barStyle]} />
+    <View style={barStyles.track}>
+      <Animated.View style={[barStyles.fill, style]} />
     </View>
   );
 }
+
+const barStyles = StyleSheet.create({
+  track: {
+    height: 110,
+    width: 10,
+    backgroundColor: "rgba(255,255,255,0.05)",
+    borderRadius: 5,
+    justifyContent: "flex-end",
+    marginBottom: 8,
+    overflow: "hidden",
+  },
+  fill: { width: "100%", borderRadius: 5 },
+});
 
 export default function InsightsScreen() {
   const insets = useSafeAreaInsets();
@@ -70,82 +65,57 @@ export default function InsightsScreen() {
         contentContainerStyle={{
           paddingTop: topPad,
           paddingBottom: insets.bottom + 120,
-          paddingHorizontal: 22,
+          paddingHorizontal: 24,
         }}
         showsVerticalScrollIndicator={false}
       >
-        <Animated.View entering={FadeInUp.delay(40).duration(600)} style={styles.header}>
+        <Animated.View entering={FadeInUp.delay(40).duration(700)} style={styles.header}>
           <GlowText style={styles.title}>Your emotional{"\n"}landscape</GlowText>
           <Text style={[styles.subtitle, { color: colors.mutedForeground }]}>
             Gentle reflection, not performance tracking
           </Text>
         </Animated.View>
 
-        <Animated.View entering={FadeInUp.delay(120).duration(600)}>
-          <Text style={[styles.sectionTitle, { color: colors.mutedForeground }]}>
-            This week
-          </Text>
+        <Animated.View entering={FadeInUp.delay(120).duration(700)}>
+          <Text style={[styles.sectionLabel, { color: colors.mutedForeground }]}>This week</Text>
           <PremiumCard style={styles.chartCard}>
             <View style={styles.chart}>
               {weeklyMoodData.map((d, i) => (
                 <View key={i} style={styles.barCol}>
                   <AnimatedBar score={d.score} index={i} colors={colors} />
-                  <Text style={[styles.barLabel, { color: colors.foreground }]}>
-                    {d.day}
-                  </Text>
-                  <Text
-                    style={[styles.moodLabel, { color: colors.mutedForeground }]}
-                    numberOfLines={1}
-                  >
+                  <Text style={[styles.barDay, { color: colors.foreground }]}>{d.day}</Text>
+                  <Text style={[styles.barMood, { color: colors.mutedForeground }]} numberOfLines={1}>
                     {d.label}
                   </Text>
                 </View>
               ))}
             </View>
-            <View style={[styles.chartLegend, { borderTopColor: colors.border }]}>
+            <View style={[styles.chartLegend, { borderTopColor: "rgba(255,255,255,0.06)" }]}>
               {[
-                { label: "hard", color: colors.primary + "45" },
-                { label: "okay", color: colors.primary + "80" },
-                { label: "good", color: colors.primary },
-              ].map(({ label, color }) => (
+                { label: "hard", alpha: "42" },
+                { label: "okay", alpha: "88" },
+                { label: "good", alpha: "FF" },
+              ].map(({ label, alpha }) => (
                 <View key={label} style={styles.legendItem}>
-                  <View style={[styles.legendDot, { backgroundColor: color }]} />
-                  <Text style={[styles.legendText, { color: colors.mutedForeground }]}>
-                    {label}
-                  </Text>
+                  <View style={[styles.legendDot, { backgroundColor: colors.primary + alpha }]} />
+                  <Text style={[styles.legendText, { color: colors.mutedForeground }]}>{label}</Text>
                 </View>
               ))}
             </View>
           </PremiumCard>
         </Animated.View>
 
-        <Animated.View entering={FadeInUp.delay(220).duration(600)}>
-          <Text style={[styles.sectionTitle, { color: colors.mutedForeground }]}>
-            Patterns
-          </Text>
-          {mockPatterns.map((pattern, i) => (
-            <Animated.View
-              key={i}
-              entering={FadeInUp.delay(220 + i * 60).duration(500)}
-            >
+        <Animated.View entering={FadeInUp.delay(220).duration(700)}>
+          <Text style={[styles.sectionLabel, { color: colors.mutedForeground }]}>Patterns</Text>
+          {mockPatterns.map((p, i) => (
+            <Animated.View key={i} entering={FadeInUp.delay(220 + i * 55).duration(550)}>
               <PremiumCard style={styles.patternCard}>
                 <View style={styles.patternRow}>
-                  <View
-                    style={[
-                      styles.patternIconWrap,
-                      { backgroundColor: colors.primary + "12" },
-                    ]}
-                  >
-                    <Feather
-                      name={pattern.icon as any}
-                      size={14}
-                      color={colors.primary + "CC"}
-                    />
+                  <View style={[styles.patternIcon, { backgroundColor: "rgba(148,145,240,0.10)" }]}>
+                    <Feather name={p.icon as any} size={13} color={"rgba(148,145,240,0.80)"} />
                   </View>
-                  <Text
-                    style={[styles.patternText, { color: colors.secondaryForeground }]}
-                  >
-                    {pattern.text}
+                  <Text style={[styles.patternText, { color: colors.secondaryForeground }]}>
+                    {p.text}
                   </Text>
                 </View>
               </PremiumCard>
@@ -153,39 +123,33 @@ export default function InsightsScreen() {
           ))}
         </Animated.View>
 
-        <Animated.View entering={FadeInUp.delay(480).duration(600)}>
-          <Text style={[styles.sectionTitle, { color: colors.mutedForeground }]}>
+        <Animated.View entering={FadeInUp.delay(480).duration(700)}>
+          <Text style={[styles.sectionLabel, { color: colors.mutedForeground }]}>
             Reflection streak
           </Text>
-          <PremiumCard style={styles.streakCard}>
-            <Text style={[styles.streakCount, { color: colors.foreground }]}>
-              12 days
-            </Text>
-            <Text style={[styles.streakLabel, { color: colors.mutedForeground }]}>
+          <PremiumCard style={styles.streakCard} glow>
+            <Text style={[styles.streakNum, { color: colors.foreground }]}>12 days</Text>
+            <Text style={[styles.streakSub, { color: colors.mutedForeground }]}>
               of showing up for yourself
             </Text>
-            <View style={styles.grid}>
-              {consistencyDots.map((dot, i) => (
+            <View style={styles.dotGrid}>
+              {consistencyDots.map((d, i) => (
                 <View
                   key={i}
                   style={[
                     styles.dot,
                     {
-                      backgroundColor: dot.filled
-                        ? dot.recent
+                      backgroundColor: d.filled
+                        ? d.recent
                           ? colors.primary
-                          : colors.primary + "60"
-                        : colors.secondary,
-                      borderWidth: dot.filled ? 0 : 1,
-                      borderColor: colors.border,
+                          : colors.primary + "55"
+                        : "rgba(255,255,255,0.05)",
                     },
                   ]}
                 />
               ))}
             </View>
-            <Text style={[styles.streakNote, { color: colors.mutedForeground }]}>
-              Last 3 weeks
-            </Text>
+            <Text style={[styles.streakNote, { color: colors.mutedForeground }]}>Last 3 weeks</Text>
           </PremiumCard>
         </Animated.View>
       </ScrollView>
@@ -195,18 +159,14 @@ export default function InsightsScreen() {
 
 const styles = StyleSheet.create({
   header: { marginBottom: 28 },
-  title: { fontSize: 34, lineHeight: 42, marginBottom: 8 },
-  subtitle: {
+  title: { fontSize: 34, lineHeight: 44, marginBottom: 8 },
+  subtitle: { fontFamily: "DMSans_400Regular", fontSize: 15, lineHeight: 22 },
+  sectionLabel: {
     fontFamily: "DMSans_400Regular",
-    fontSize: 15,
-    lineHeight: 22,
-  },
-  sectionTitle: {
-    fontFamily: "DMSans_400Regular",
-    fontSize: 12,
+    fontSize: 11,
     marginBottom: 12,
     marginTop: 4,
-    letterSpacing: 0.6,
+    letterSpacing: 0.8,
     textTransform: "uppercase",
   },
   chartCard: { marginBottom: 28, paddingHorizontal: 16, paddingBottom: 0 },
@@ -218,18 +178,8 @@ const styles = StyleSheet.create({
     paddingTop: 8,
   },
   barCol: { alignItems: "center", width: "12%" },
-  barContainer: {
-    height: 120,
-    width: 10,
-    backgroundColor: "rgba(30, 32, 56, 0.8)",
-    borderRadius: 5,
-    justifyContent: "flex-end",
-    marginBottom: 8,
-    overflow: "hidden",
-  },
-  bar: { width: "100%", borderRadius: 5 },
-  barLabel: { fontFamily: "DMSans_500Medium", fontSize: 11, marginBottom: 3 },
-  moodLabel: { fontFamily: "DMSans_400Regular", fontSize: 9, textAlign: "center" },
+  barDay: { fontFamily: "DMSans_500Medium", fontSize: 11, marginBottom: 3 },
+  barMood: { fontFamily: "DMSans_400Regular", fontSize: 9, textAlign: "center" },
   chartLegend: {
     flexDirection: "row",
     justifyContent: "center",
@@ -244,43 +194,20 @@ const styles = StyleSheet.create({
   legendItem: { flexDirection: "row", alignItems: "center", gap: 6 },
   legendDot: { width: 8, height: 8, borderRadius: 4 },
   legendText: { fontFamily: "DMSans_400Regular", fontSize: 12 },
-  patternCard: { marginBottom: 10, paddingVertical: 16, paddingHorizontal: 18 },
+  patternCard: { marginBottom: 9, paddingVertical: 15, paddingHorizontal: 18 },
   patternRow: { flexDirection: "row", alignItems: "center", gap: 14 },
-  patternIconWrap: {
+  patternIcon: {
     width: 30,
     height: 30,
     borderRadius: 15,
     alignItems: "center",
     justifyContent: "center",
   },
-  patternText: {
-    fontFamily: "DMSans_400Regular",
-    fontSize: 15,
-    lineHeight: 22,
-    flex: 1,
-  },
+  patternText: { fontFamily: "DMSans_400Regular", fontSize: 15, lineHeight: 22, flex: 1 },
   streakCard: { marginBottom: 16 },
-  streakCount: {
-    fontFamily: "DMSerifDisplay_400Regular",
-    fontSize: 38,
-    lineHeight: 44,
-    marginBottom: 2,
-  },
-  streakLabel: {
-    fontFamily: "DMSans_400Regular",
-    fontSize: 14,
-    marginBottom: 20,
-  },
-  grid: {
-    flexDirection: "row",
-    flexWrap: "wrap",
-    gap: 10,
-    marginBottom: 12,
-  },
+  streakNum: { fontFamily: "DMSerifDisplay_400Regular", fontSize: 38, lineHeight: 44, marginBottom: 2 },
+  streakSub: { fontFamily: "DMSans_400Regular", fontSize: 14, marginBottom: 20 },
+  dotGrid: { flexDirection: "row", flexWrap: "wrap", gap: 10, marginBottom: 12 },
   dot: { width: 14, height: 14, borderRadius: 7 },
-  streakNote: {
-    fontFamily: "DMSans_400Regular",
-    fontSize: 12,
-    letterSpacing: 0.2,
-  },
+  streakNote: { fontFamily: "DMSans_400Regular", fontSize: 12, letterSpacing: 0.2 },
 });

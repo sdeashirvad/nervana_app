@@ -1,12 +1,5 @@
 import React from "react";
-import {
-  StyleSheet,
-  View,
-  Text,
-  ScrollView,
-  Pressable,
-  Platform,
-} from "react-native";
+import { StyleSheet, View, Text, ScrollView, Pressable, Platform } from "react-native";
 import { useRouter } from "expo-router";
 import { AtmosphericBackground } from "@/components/AtmosphericBackground";
 import { PremiumCard } from "@/components/PremiumCard";
@@ -20,9 +13,9 @@ import { CalmButton } from "@/components/CalmButton";
 import Animated, { FadeInUp } from "react-native-reanimated";
 
 const STATS = [
-  { label: "Days", value: "12", sub: "streak" },
-  { label: "Entries", value: "6", sub: "journal" },
-  { label: "Coins", value: "1,240", sub: "calm" },
+  { label: "day streak", value: "12" },
+  { label: "journal entries", value: "6" },
+  { label: "calm coins", value: "1,240" },
 ];
 
 export default function ProfileScreen() {
@@ -41,10 +34,10 @@ export default function ProfileScreen() {
         }}
         showsVerticalScrollIndicator={false}
       >
-        {/* Avatar & Name */}
-        <Animated.View entering={FadeInUp.delay(40).duration(600)} style={styles.profileHeader}>
+        {/* Avatar */}
+        <Animated.View entering={FadeInUp.delay(40).duration(700)} style={styles.profileHeader}>
           <LinearGradient
-            colors={["#7B7FF0", "#5058C8"]}
+            colors={["#A09CF2", "#6C68D8", "#5050C0"]}
             style={styles.avatar}
             start={{ x: 0, y: 0 }}
             end={{ x: 1, y: 1 }}
@@ -52,60 +45,59 @@ export default function ProfileScreen() {
             <GlowText style={styles.avatarText}>AL</GlowText>
           </LinearGradient>
           <GlowText style={styles.name}>{mockUser.name}</GlowText>
-          <Text style={[styles.profession, { color: colors.mutedForeground }]}>
+          <Text style={[styles.profession, { color: colors.secondaryForeground }]}>
             {mockUser.profession}
           </Text>
-          <Text style={[styles.memberSince, { color: colors.mutedForeground + "80" }]}>
+          <Text style={[styles.memberSince, { color: colors.mutedForeground }]}>
             Member since November 2025
           </Text>
         </Animated.View>
 
-        {/* Stats row */}
-        <Animated.View entering={FadeInUp.delay(120).duration(600)} style={styles.statsRow}>
-          {STATS.map(({ label, value, sub }) => (
+        {/* Stats */}
+        <Animated.View entering={FadeInUp.delay(120).duration(700)} style={styles.statsRow}>
+          {STATS.map(({ label, value }) => (
             <View
               key={label}
-              style={[styles.statCell, { borderColor: colors.border }]}
+              style={[
+                styles.statCell,
+                {
+                  borderColor: "rgba(255,255,255,0.07)",
+                  backgroundColor: "rgba(255,255,255,0.03)",
+                },
+              ]}
             >
-              <Text style={[styles.statValue, { color: colors.foreground }]}>
-                {value}
-              </Text>
-              <Text style={[styles.statLabel, { color: colors.mutedForeground }]}>
-                {sub} {label.toLowerCase()}
-              </Text>
+              <Text style={[styles.statValue, { color: colors.foreground }]}>{value}</Text>
+              <Text style={[styles.statLabel, { color: colors.mutedForeground }]}>{label}</Text>
             </View>
           ))}
         </Animated.View>
 
         {/* Calm Coins */}
-        <Animated.View entering={FadeInUp.delay(200).duration(600)}>
+        <Animated.View entering={FadeInUp.delay(200).duration(700)}>
           <PremiumCard style={styles.coinsCard} glow>
-            <View style={styles.coinsHeader}>
-              <View style={[styles.coinIcon, { backgroundColor: colors.primary + "18" }]}>
-                <Feather name="star" size={18} color={colors.primary} />
+            <View style={styles.coinsRow}>
+              <View style={[styles.coinIcon, { backgroundColor: "rgba(148,145,240,0.12)" }]}>
+                <Feather name="star" size={17} color={colors.primary} />
               </View>
               <View style={{ flex: 1 }}>
-                <Text style={[styles.coinsAmount, { color: colors.foreground }]}>
+                <Text style={[styles.coinsAmt, { color: colors.foreground }]}>
                   1,240 Calm Coins
                 </Text>
-                <Text style={[styles.coinsSubtitle, { color: colors.mutedForeground }]}>
+                <Text style={[styles.coinsSub, { color: colors.mutedForeground }]}>
                   Earned through reflection
                 </Text>
               </View>
             </View>
             <CalmButton
-              title="Invite a friend, earn 200 coins"
+              title="Invite a friend — earn 200 coins"
               onPress={() => router.push("/referral")}
-              style={styles.inviteBtn}
             />
           </PremiumCard>
         </Animated.View>
 
-        {/* My journey */}
-        <Animated.View entering={FadeInUp.delay(280).duration(600)}>
-          <Text style={[styles.sectionTitle, { color: colors.mutedForeground }]}>
-            My journey
-          </Text>
+        {/* Journey */}
+        <Animated.View entering={FadeInUp.delay(280).duration(700)}>
+          <Text style={[styles.sectionLabel, { color: colors.mutedForeground }]}>My journey</Text>
           <PremiumCard style={styles.sectionCard}>
             {[
               { icon: "calendar", text: "12 days of showing up" },
@@ -113,11 +105,9 @@ export default function ProfileScreen() {
               { icon: "message-circle", text: "14 conversations with Companion" },
             ].map(({ icon, text }, i) => (
               <React.Fragment key={text}>
-                {i > 0 && (
-                  <View style={[styles.divider, { backgroundColor: colors.border }]} />
-                )}
+                {i > 0 && <View style={[styles.divider, { backgroundColor: "rgba(255,255,255,0.06)" }]} />}
                 <View style={styles.row}>
-                  <Feather name={icon as any} size={16} color={colors.primary + "80"} style={styles.rowIcon} />
+                  <Feather name={icon as any} size={15} color={"rgba(148,145,240,0.60)"} style={styles.rowIcon} />
                   <Text style={[styles.rowText, { color: colors.foreground }]}>{text}</Text>
                 </View>
               </React.Fragment>
@@ -126,10 +116,8 @@ export default function ProfileScreen() {
         </Animated.View>
 
         {/* Preferences */}
-        <Animated.View entering={FadeInUp.delay(360).duration(600)}>
-          <Text style={[styles.sectionTitle, { color: colors.mutedForeground }]}>
-            Preferences
-          </Text>
+        <Animated.View entering={FadeInUp.delay(360).duration(700)}>
+          <Text style={[styles.sectionLabel, { color: colors.mutedForeground }]}>Preferences</Text>
           <PremiumCard style={styles.sectionCard}>
             {[
               { label: "Daily reminder time", value: "9:00 AM" },
@@ -137,16 +125,12 @@ export default function ProfileScreen() {
               { label: "Companion response style", value: "Reflective" },
             ].map(({ label, value }, i) => (
               <React.Fragment key={label}>
-                {i > 0 && (
-                  <View style={[styles.divider, { backgroundColor: colors.border }]} />
-                )}
+                {i > 0 && <View style={[styles.divider, { backgroundColor: "rgba(255,255,255,0.06)" }]} />}
                 <Pressable style={styles.row}>
                   <Text style={[styles.rowText, { color: colors.foreground }]}>{label}</Text>
                   <View style={styles.rowRight}>
-                    <Text style={[styles.rowValue, { color: colors.mutedForeground }]}>
-                      {value}
-                    </Text>
-                    <Feather name="chevron-right" size={16} color={colors.mutedForeground + "60"} />
+                    <Text style={[styles.rowValue, { color: colors.mutedForeground }]}>{value}</Text>
+                    <Feather name="chevron-right" size={15} color={"rgba(255,255,255,0.18)"} />
                   </View>
                 </Pressable>
               </React.Fragment>
@@ -155,10 +139,8 @@ export default function ProfileScreen() {
         </Animated.View>
 
         {/* About */}
-        <Animated.View entering={FadeInUp.delay(440).duration(600)}>
-          <Text style={[styles.sectionTitle, { color: colors.mutedForeground }]}>
-            About Nervana
-          </Text>
+        <Animated.View entering={FadeInUp.delay(440).duration(700)}>
+          <Text style={[styles.sectionLabel, { color: colors.mutedForeground }]}>About</Text>
           <PremiumCard style={styles.sectionCard}>
             {[
               { label: "Version", value: "1.0.0", chevron: false },
@@ -166,20 +148,12 @@ export default function ProfileScreen() {
               { label: "Terms of Service", value: "", chevron: true },
             ].map(({ label, value, chevron }, i) => (
               <React.Fragment key={label}>
-                {i > 0 && (
-                  <View style={[styles.divider, { backgroundColor: colors.border }]} />
-                )}
+                {i > 0 && <View style={[styles.divider, { backgroundColor: "rgba(255,255,255,0.06)" }]} />}
                 <Pressable style={styles.row}>
                   <Text style={[styles.rowText, { color: colors.foreground }]}>{label}</Text>
                   <View style={styles.rowRight}>
-                    {value ? (
-                      <Text style={[styles.rowValue, { color: colors.mutedForeground }]}>
-                        {value}
-                      </Text>
-                    ) : null}
-                    {chevron && (
-                      <Feather name="chevron-right" size={16} color={colors.mutedForeground + "60"} />
-                    )}
+                    {!!value && <Text style={[styles.rowValue, { color: colors.mutedForeground }]}>{value}</Text>}
+                    {chevron && <Feather name="chevron-right" size={15} color={"rgba(255,255,255,0.18)"} />}
                   </View>
                 </Pressable>
               </React.Fragment>
@@ -187,7 +161,7 @@ export default function ProfileScreen() {
           </PremiumCard>
         </Animated.View>
 
-        <Text style={[styles.tagline, { color: colors.mutedForeground + "50" }]}>
+        <Text style={[styles.tagline, { color: "rgba(255,255,255,0.12)" }]}>
           your mental exhale
         </Text>
       </ScrollView>
@@ -196,10 +170,7 @@ export default function ProfileScreen() {
 }
 
 const styles = StyleSheet.create({
-  profileHeader: {
-    alignItems: "center",
-    marginBottom: 28,
-  },
+  profileHeader: { alignItems: "center", marginBottom: 26 },
   avatar: {
     width: 76,
     height: 76,
@@ -208,104 +179,52 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     marginBottom: 14,
   },
-  avatarText: { fontSize: 28, color: "#F5F3EE" },
+  avatarText: { fontSize: 28, color: "#F0EDE8" },
   name: { fontSize: 26, marginBottom: 4 },
   profession: { fontFamily: "DMSans_400Regular", fontSize: 15, marginBottom: 4 },
-  memberSince: {
-    fontFamily: "DMSans_400Regular",
-    fontSize: 12,
-    letterSpacing: 0.2,
-  },
-  statsRow: {
-    flexDirection: "row",
-    gap: 12,
-    marginBottom: 24,
-  },
+  memberSince: { fontFamily: "DMSans_400Regular", fontSize: 12, letterSpacing: 0.2 },
+  statsRow: { flexDirection: "row", gap: 10, marginBottom: 22 },
   statCell: {
     flex: 1,
     borderWidth: 1,
     borderRadius: 16,
-    paddingVertical: 16,
-    paddingHorizontal: 12,
+    paddingVertical: 15,
+    paddingHorizontal: 10,
     alignItems: "center",
-    backgroundColor: "rgba(19, 21, 42, 0.8)",
   },
-  statValue: {
-    fontFamily: "DMSerifDisplay_400Regular",
-    fontSize: 22,
-    marginBottom: 3,
-  },
-  statLabel: {
+  statValue: { fontFamily: "DMSerifDisplay_400Regular", fontSize: 20, marginBottom: 3 },
+  statLabel: { fontFamily: "DMSans_400Regular", fontSize: 11, textAlign: "center" },
+  coinsCard: { marginBottom: 26 },
+  coinsRow: { flexDirection: "row", alignItems: "center", gap: 14, marginBottom: 18 },
+  coinIcon: { width: 38, height: 38, borderRadius: 19, alignItems: "center", justifyContent: "center" },
+  coinsAmt: { fontFamily: "DMSerifDisplay_400Regular", fontSize: 19, marginBottom: 2 },
+  coinsSub: { fontFamily: "DMSans_400Regular", fontSize: 13 },
+  sectionLabel: {
     fontFamily: "DMSans_400Regular",
     fontSize: 11,
-    textAlign: "center",
-    letterSpacing: 0.1,
-  },
-  coinsCard: { marginBottom: 28 },
-  coinsHeader: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 14,
-    marginBottom: 18,
-  },
-  coinIcon: {
-    width: 38,
-    height: 38,
-    borderRadius: 19,
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  coinsAmount: {
-    fontFamily: "DMSerifDisplay_400Regular",
-    fontSize: 20,
-    marginBottom: 2,
-  },
-  coinsSubtitle: {
-    fontFamily: "DMSans_400Regular",
-    fontSize: 13,
-  },
-  inviteBtn: {},
-  sectionTitle: {
-    fontFamily: "DMSans_400Regular",
-    fontSize: 12,
     marginBottom: 10,
     marginLeft: 2,
-    letterSpacing: 0.6,
+    letterSpacing: 0.8,
     textTransform: "uppercase",
   },
-  sectionCard: {
-    padding: 0,
-    marginBottom: 28,
-    overflow: "hidden",
-  },
+  sectionCard: { padding: 0, marginBottom: 26, overflow: "hidden" },
   row: {
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
     paddingHorizontal: 20,
-    paddingVertical: 18,
+    paddingVertical: 17,
   },
   rowIcon: { marginRight: 12 },
-  rowText: {
-    fontFamily: "DMSans_400Regular",
-    fontSize: 15,
-    flex: 1,
-  },
-  rowRight: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 6,
-  },
-  rowValue: {
-    fontFamily: "DMSans_400Regular",
-    fontSize: 14,
-  },
+  rowText: { fontFamily: "DMSans_400Regular", fontSize: 15, flex: 1 },
+  rowRight: { flexDirection: "row", alignItems: "center", gap: 6 },
+  rowValue: { fontFamily: "DMSans_400Regular", fontSize: 14 },
   divider: { height: 1, marginLeft: 20 },
   tagline: {
     fontFamily: "DMSans_400Regular",
     fontSize: 13,
     textAlign: "center",
-    letterSpacing: 2,
+    letterSpacing: 2.5,
     marginTop: 8,
     marginBottom: 8,
   },

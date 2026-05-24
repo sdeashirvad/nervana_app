@@ -1,5 +1,5 @@
 import React from "react";
-import { Pressable, StyleSheet, Text, ViewStyle, Platform } from "react-native";
+import { Platform, Pressable, StyleSheet, Text, ViewStyle } from "react-native";
 import Animated, {
   useAnimatedStyle,
   useSharedValue,
@@ -25,19 +25,19 @@ export function MoodChip({ label, selected = false, onPress, style }: MoodChipPr
   const animatedStyle = useAnimatedStyle(() => ({
     transform: [{ scale: scale.value }],
     backgroundColor: selected
-      ? withTiming(colors.primary + "28", { duration: 250 })
-      : withTiming(colors.card, { duration: 250 }),
+      ? withTiming("rgba(148, 145, 240, 0.18)", { duration: 280 })
+      : withTiming("rgba(255, 255, 255, 0.03)", { duration: 280 }),
     borderColor: selected
-      ? withTiming(colors.primary + "70", { duration: 250 })
-      : withTiming(colors.border, { duration: 250 }),
+      ? withTiming("rgba(148, 145, 240, 0.45)", { duration: 280 })
+      : withTiming("rgba(255, 255, 255, 0.08)", { duration: 280 }),
   }));
 
   const handlePressIn = () => {
-    scale.value = withSpring(0.94, { damping: 20, stiffness: 300 });
+    scale.value = withSpring(0.94, { damping: 22, stiffness: 320 });
   };
 
   const handlePressOut = () => {
-    scale.value = withSpring(1, { damping: 14, stiffness: 200 });
+    scale.value = withSpring(1, { damping: 15, stiffness: 220 });
   };
 
   const handlePress = () => {
@@ -45,7 +45,7 @@ export function MoodChip({ label, selected = false, onPress, style }: MoodChipPr
       Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
     }
     onPress();
-    scale.value = withSpring(1.05, { damping: 12 }, () => {
+    scale.value = withSpring(1.04, { damping: 12 }, () => {
       scale.value = withSpring(1, { damping: 14 });
     });
   };
@@ -76,7 +76,7 @@ const styles = StyleSheet.create({
   container: {
     paddingVertical: 10,
     paddingHorizontal: 18,
-    borderRadius: 30,
+    borderRadius: 32,
     borderWidth: 1,
     marginRight: 8,
     marginBottom: 8,
@@ -84,6 +84,6 @@ const styles = StyleSheet.create({
   },
   text: {
     fontSize: 14,
-    letterSpacing: 0.1,
+    letterSpacing: 0.15,
   },
 });
