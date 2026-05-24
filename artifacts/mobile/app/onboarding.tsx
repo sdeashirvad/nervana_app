@@ -7,6 +7,7 @@ import {
   NativeSyntheticEvent,
   NativeScrollEvent,
   Platform,
+  ScrollView,
 } from "react-native";
 import { useRouter } from "expo-router";
 import { AtmosphericBackground } from "@/components/AtmosphericBackground";
@@ -17,8 +18,6 @@ import { useColors } from "@/hooks/useColors";
 import Animated, {
   useAnimatedScrollHandler,
   useSharedValue,
-  useAnimatedStyle,
-  interpolate,
   FadeInUp,
 } from "react-native-reanimated";
 
@@ -53,11 +52,14 @@ export default function OnboardingScreen() {
   const scrollX = useSharedValue(0);
 
   const scrollHandler = useAnimatedScrollHandler({
-    onScroll: (e) => { scrollX.value = e.contentOffset.x; },
+    onScroll: (e) => {
+      scrollX.value = e.contentOffset.x;
+    },
   });
 
-  const topPad = Platform.OS === "web" ? 80 : insets.top + 60;
-  const bottomPad = Platform.OS === "web" ? 52 : insets.bottom + 52;
+  const topPad = Platform.OS === "web" ? 72 : insets.top + 48;
+  const bottomPad = Platform.OS === "web" ? 44 : insets.bottom + 32;
+  const pillBottom = Platform.OS === "web" ? 18 : insets.bottom + 14;
 
   return (
     <AtmosphericBackground>
@@ -73,42 +75,56 @@ export default function OnboardingScreen() {
         style={styles.scrollView}
       >
         {SLIDES.map((slide, index) => (
-          <View
+          <ScrollView
             key={index}
-            style={[styles.slide, { paddingTop: topPad, paddingBottom: bottomPad }]}
+            style={{ width }}
+            contentContainerStyle={[
+              styles.slideContent,
+              { paddingTop: topPad, paddingBottom: bottomPad },
+            ]}
+            showsVerticalScrollIndicator={false}
+            bounces={false}
+            scrollEnabled={false}
           >
-            <View style={styles.textContainer}>
-              <Animated.View entering={FadeInUp.delay(80).duration(750)}>
-                <Text style={[styles.slideNum, { color: colors.primary }]}>{slide.num}</Text>
-                <GlowText style={styles.title}>{slide.title}</GlowText>
-                <Text style={[styles.subtitle, { color: colors.secondaryForeground }]}>
-                  {slide.subtitle}
-                </Text>
-              </Animated.View>
-            </View>
+            <Animated.View
+              entering={FadeInUp.delay(80).duration(750)}
+              style={styles.textBlock}
+            >
+              <Text style={[styles.slideNum, { color: colors.primary }]}>
+                {slide.num}
+              </Text>
+              <GlowText style={styles.title}>{slide.title}</GlowText>
+              <Text
+                style={[
+                  styles.subtitle,
+                  { color: colors.secondaryForeground },
+                ]}
+              >
+                {slide.subtitle}
+              </Text>
+            </Animated.View>
 
             {index === SLIDES.length - 1 && (
               <Animated.View
                 entering={FadeInUp.delay(320).duration(650)}
                 style={styles.cta}
               >
-                <CalmButton title="Begin" onPress={() => router.push("/auth")} />
-                <Text style={[styles.hint, { color: colors.mutedForeground }]}>
+                <CalmButton
+                  title="Begin"
+                  onPress={() => router.push("/auth")}
+                />
+                <Text
+                  style={[styles.hint, { color: colors.mutedForeground }]}
+                >
                   Your reflections stay on your device.
                 </Text>
               </Animated.View>
             )}
-          </View>
+          </ScrollView>
         ))}
       </Animated.ScrollView>
 
-      {/* Pagination pills */}
-      <View
-        style={[
-          styles.pagination,
-          { bottom: Platform.OS === "web" ? 22 : insets.bottom + 18 },
-        ]}
-      >
+      <View style={[styles.pagination, { bottom: pillBottom }]}>
         {SLIDES.map((_, i) => (
           <View
             key={i}
@@ -127,28 +143,36 @@ export default function OnboardingScreen() {
 
 const styles = StyleSheet.create({
   scrollView: { flex: 1 },
-  slide: {
+  slideContent: {
     width,
-    flex: 1,
     paddingHorizontal: 34,
+    flexGrow: 1,
     justifyContent: "space-between",
   },
-  textContainer: { flex: 1, justifyContent: "center" },
+  textBlock: {
+    flex: 1,
+    justifyContent: "center",
+    paddingBottom: 32,
+  },
   slideNum: {
     fontFamily: "DMSans_400Regular",
     fontSize: 12,
     letterSpacing: 2.5,
-    marginBottom: 22,
+    marginBottom: 20,
     opacity: 0.7,
   },
-  title: { fontSize: 40, lineHeight: 52, marginBottom: 24 },
+  title: { fontSize: 38, lineHeight: 50, marginBottom: 22 },
   subtitle: {
     fontFamily: "DMSans_400Regular",
-    fontSize: 17,
-    lineHeight: 27,
+    fontSize: 16,
+    lineHeight: 26,
   },
-  cta: { gap: 18, alignItems: "center" },
-  hint: { fontFamily: "DMSans_400Regular", fontSize: 13, letterSpacing: 0.2 },
+  cta: { gap: 16, alignItems: "center", paddingBottom: 8 },
+  hint: {
+    fontFamily: "DMSans_400Regular",
+    fontSize: 13,
+    letterSpacing: 0.2,
+  },
   pagination: {
     flexDirection: "row",
     position: "absolute",
