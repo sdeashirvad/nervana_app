@@ -7,7 +7,6 @@ import {
   NativeSyntheticEvent,
   NativeScrollEvent,
   Platform,
-  ScrollView,
 } from "react-native";
 import { useRouter } from "expo-router";
 import { AtmosphericBackground } from "@/components/AtmosphericBackground";
@@ -21,7 +20,10 @@ import Animated, {
   FadeInUp,
 } from "react-native-reanimated";
 
-const { width } = Dimensions.get("window");
+const { width, height } = Dimensions.get("window");
+
+// Compact spacing for short devices, generous spacing for tall ones
+const isShortDevice = height < 700;
 
 const SLIDES = [
   {
@@ -57,8 +59,8 @@ export default function OnboardingScreen() {
     },
   });
 
-  const topPad = Platform.OS === "web" ? 72 : insets.top + 48;
-  const bottomPad = Platform.OS === "web" ? 44 : insets.bottom + 32;
+  const topPad = Platform.OS === "web" ? 72 : insets.top + (isShortDevice ? 32 : 52);
+  const bottomPad = Platform.OS === "web" ? 44 : insets.bottom + (isShortDevice ? 20 : 40);
   const pillBottom = Platform.OS === "web" ? 18 : insets.bottom + 14;
 
   return (
@@ -67,6 +69,7 @@ export default function OnboardingScreen() {
         horizontal
         pagingEnabled
         showsHorizontalScrollIndicator={false}
+        bounces={false}
         onScroll={scrollHandler}
         onMomentumScrollEnd={(e: NativeSyntheticEvent<NativeScrollEvent>) => {
           setCurrentIndex(Math.round(e.nativeEvent.contentOffset.x / width));
@@ -75,16 +78,12 @@ export default function OnboardingScreen() {
         style={styles.scrollView}
       >
         {SLIDES.map((slide, index) => (
-          <ScrollView
+          <View
             key={index}
-            style={{ width }}
-            contentContainerStyle={[
-              styles.slideContent,
+            style={[
+              styles.slide,
               { paddingTop: topPad, paddingBottom: bottomPad },
             ]}
-            showsVerticalScrollIndicator={false}
-            bounces={false}
-            scrollEnabled={false}
           >
             <Animated.View
               entering={FadeInUp.delay(80).duration(750)}
@@ -93,10 +92,13 @@ export default function OnboardingScreen() {
               <Text style={[styles.slideNum, { color: colors.primary }]}>
                 {slide.num}
               </Text>
-              <GlowText style={styles.title}>{slide.title}</GlowText>
+              <GlowText style={[styles.title, isShortDevice && styles.titleCompact]}>
+                {slide.title}
+              </GlowText>
               <Text
                 style={[
                   styles.subtitle,
+                  isShortDevice && styles.subtitleCompact,
                   { color: colors.secondaryForeground },
                 ]}
               >
@@ -120,7 +122,7 @@ export default function OnboardingScreen() {
                 </Text>
               </Animated.View>
             )}
-          </ScrollView>
+          </View>
         ))}
       </Animated.ScrollView>
 
@@ -143,16 +145,15 @@ export default function OnboardingScreen() {
 
 const styles = StyleSheet.create({
   scrollView: { flex: 1 },
-  slideContent: {
+  slide: {
     width,
+    flex: 1,
     paddingHorizontal: 34,
-    flexGrow: 1,
     justifyContent: "space-between",
   },
   textBlock: {
     flex: 1,
     justifyContent: "center",
-    paddingBottom: 32,
   },
   slideNum: {
     fontFamily: "DMSans_400Regular",
@@ -161,13 +162,26 @@ const styles = StyleSheet.create({
     marginBottom: 20,
     opacity: 0.7,
   },
-  title: { fontSize: 38, lineHeight: 50, marginBottom: 22 },
+  title: {
+    fontSize: 40,
+    lineHeight: 52,
+    marginBottom: 24,
+  },
+  titleCompact: {
+    fontSize: 34,
+    lineHeight: 44,
+    marginBottom: 16,
+  },
   subtitle: {
     fontFamily: "DMSans_400Regular",
-    fontSize: 16,
-    lineHeight: 26,
+    fontSize: 17,
+    lineHeight: 27,
   },
-  cta: { gap: 16, alignItems: "center", paddingBottom: 8 },
+  subtitleCompact: {
+    fontSize: 15,
+    lineHeight: 24,
+  },
+  cta: { gap: 16, alignItems: "center" },
   hint: {
     fontFamily: "DMSans_400Regular",
     fontSize: 13,
