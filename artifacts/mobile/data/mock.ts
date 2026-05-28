@@ -15,11 +15,6 @@ export const mockCheckins = [
   { id: "3", date: "2026-05-21", mood: "calm", note: "Slow morning with no Slack. Worked better than any meeting ever could.", calmScore: 5 },
   { id: "4", date: "2026-05-20", mood: "overwhelmed", note: "Three meetings, a deploy, and a performance review prep. Too much.", calmScore: 1 },
   { id: "5", date: "2026-05-19", mood: "hopeful", note: "1:1 with my manager was unexpectedly good. Felt heard.", calmScore: 4 },
-  { id: "6", date: "2026-05-18", mood: "emotionally numb", note: "Couldn't feel much of anything. Just moved through the day.", calmScore: 2 },
-  { id: "7", date: "2026-05-17", mood: "distracted", note: "Hard to focus. News cycle, Slack notifications, everything.", calmScore: 3 },
-  { id: "8", date: "2026-05-16", mood: "calm", note: "Took a real lunch break. Read outside. Forgot what that felt like.", calmScore: 5 },
-  { id: "9", date: "2026-05-15", mood: "anxious", note: "Quarterly goals review. Always makes me second-guess everything.", calmScore: 2 },
-  { id: "10", date: "2026-05-14", mood: "hopeful", note: "Team shipped something I'm proud of. That doesn't happen often enough.", calmScore: 4 },
 ];
 
 export const mockJournalEntries = [
@@ -46,30 +41,6 @@ export const mockJournalEntries = [
     content: "Sat in a senior leadership meeting today and felt completely out of place. Like everyone else had a manual I never received. I know this is a feeling, not a fact. But it felt very real in that room.",
     tags: ["imposter syndrome", "anxiety"],
     mood: "anxious",
-  },
-  {
-    id: "j4",
-    date: "May 15",
-    title: "The loneliness of remote work",
-    content: "Six hours of calls today and I still feel profoundly alone at the end of it. There's a difference between being heard and being seen. I have a lot of the first. Very little of the second.",
-    tags: ["loneliness", "remote work"],
-    mood: "emotionally numb",
-  },
-  {
-    id: "j5",
-    date: "May 12",
-    title: "Things I'm not saying in meetings",
-    content: "I'm tired. Not the kind sleep fixes. The kind that builds up from carrying other people's urgency for months. I keep showing up fully. I don't know how much longer I can do that without someone noticing.",
-    tags: ["burnout", "honesty"],
-    mood: "overwhelmed",
-  },
-  {
-    id: "j6",
-    date: "May 9",
-    title: "Small moments of okay",
-    content: "Nothing remarkable happened today. That's exactly why I'm writing it down. I want to remember that unremarkable can feel like relief. I laughed twice. Ate a real meal. That's something.",
-    tags: ["gratitude", "rest"],
-    mood: "calm",
   },
 ];
 
@@ -124,18 +95,43 @@ export const calmingQuotes = [
   { text: "The most courageous thing you can do right now is slow down.", author: "Nervana" },
   { text: "Your worth is not measured in your output.", author: "Nervana" },
   { text: "Some days, simply getting through it is the whole achievement.", author: "Nervana" },
-  { text: "You're allowed to be tired. Exhaustion isn't weakness.", author: "Nervana" },
-  { text: "Small pauses matter more than you think.", author: "Nervana" },
 ];
 
-export const mockNotifications = [
-  { id: "n1", title: "A quieter moment", body: "You've been carrying a lot today. Take a few slow breaths — nothing more is needed right now.", time: "10:00 AM", read: false },
-  { id: "n2", title: "Checking in on you", body: "How has your mind been lately? When did you last feel like yourself?", time: "Yesterday", read: false },
-  { id: "n3", title: "You've been carrying a lot", body: "You've shown up every day this week. That's worth acknowledging, even if it doesn't feel like enough.", time: "2 days ago", read: true },
-  { id: "n4", title: "12 days of showing up", body: "That kind of quiet consistency is rare. Your future self will feel this.", time: "3 days ago", read: true },
-  { id: "n5", title: "Evening check-in", body: "The day is winding down. Before you shift into tomorrow — how are you actually doing?", time: "4 days ago", read: true },
-  { id: "n6", title: "Small pause", body: "You don't have to process everything at once. Some things just need time.", time: "5 days ago", read: true },
+export const DAILY_INSIGHTS = [
+  "Mental clarity often starts with slowing down.",
+  "Small resets compound quietly over time.",
+  "You've been carrying a lot lately. That deserves acknowledgment.",
+  "The mind clears when you stop asking it to hold everything at once.",
+  "Rest is how your nervous system files what the day couldn't process.",
+  "You don't have to solve it all today.",
+  "Even two minutes of stillness changes your internal weather.",
+  "The pause is the practice.",
 ];
+
+export const JOURNAL_PROMPTS = [
+  "What's occupying most of your mind right now?",
+  "What would feel like relief today?",
+  "What are you carrying that isn't yours to carry?",
+  "When did you last feel like yourself?",
+  "What do you need that you haven't asked for?",
+  "What would you say to yourself if you were speaking to a friend?",
+  "What's one thing you're pretending is fine?",
+  "What does your body feel like right now?",
+];
+
+export const AI_INSIGHTS = [
+  "Your focus patterns suggest mental fatigue after long context switching.",
+  "You tend to feel calmer on mornings with fewer notifications.",
+  "Short resets between tasks seem to improve your clarity.",
+  "You've been more grounded this week than the last.",
+];
+
+export const FLOW_SCORE = {
+  focus: 72,
+  calm: 68,
+  energy: 61,
+  combined: 67,
+};
 
 export const weeklyMoodData = [
   { day: "Mon", score: 1, label: "overwhelmed" },
@@ -145,12 +141,6 @@ export const weeklyMoodData = [
   { day: "Fri", score: 4, label: "hopeful" },
   { day: "Sat", score: 5, label: "calm" },
   { day: "Sun", score: 3, label: "tired" },
-];
-
-export const mockReferrals = [
-  { name: "Jordan", joined: true, calmCoinsEarned: 200 },
-  { name: "Priya", joined: true, calmCoinsEarned: 200 },
-  { name: "Marcus", joined: false, calmCoinsEarned: 0 },
 ];
 
 export const mockPatterns = [

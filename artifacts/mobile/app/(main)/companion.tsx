@@ -10,8 +10,8 @@ import {
   Platform,
 } from "react-native";
 import { BlurView } from "expo-blur";
+import { useRouter } from "expo-router";
 import { AtmosphericBackground } from "@/components/AtmosphericBackground";
-import { GlowText } from "@/components/GlowText";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useColors } from "@/hooks/useColors";
 import { Feather } from "@expo/vector-icons";
@@ -100,30 +100,13 @@ function MessageBubble({ item }: { item: Message }) {
           style={[
             styles.bubble,
             isUser
-              ? {
-                  backgroundColor: "rgba(148, 145, 240, 0.14)",
-                  borderColor: "rgba(148, 145, 240, 0.25)",
-                  borderWidth: 1,
-                  backdropFilter: "blur(12px)",
-                } as any
-              : {
-                  backgroundColor: "rgba(255,255,255,0.04)",
-                  borderColor: "rgba(255,255,255,0.07)",
-                  borderWidth: 1,
-                  backdropFilter: "blur(12px)",
-                } as any,
+              ? { backgroundColor: "rgba(148,145,240,0.14)", borderColor: "rgba(148,145,240,0.25)", borderWidth: 1, backdropFilter: "blur(12px)" } as any
+              : { backgroundColor: "rgba(255,255,255,0.04)", borderColor: "rgba(255,255,255,0.07)", borderWidth: 1, backdropFilter: "blur(12px)" } as any,
           ]}
         >
-          <Text style={[styles.messageText, { color: colors.foreground }]}>
-            {item.text}
-          </Text>
+          <Text style={[styles.messageText, { color: colors.foreground }]}>{item.text}</Text>
         </View>
-        <Text
-          style={[
-            styles.timestamp,
-            { color: colors.mutedForeground, alignSelf: isUser ? "flex-end" : "flex-start" },
-          ]}
-        >
+        <Text style={[styles.timestamp, { color: colors.mutedForeground, alignSelf: isUser ? "flex-end" : "flex-start" }]}>
           {item.timestamp}
         </Text>
       </Animated.View>
@@ -133,10 +116,7 @@ function MessageBubble({ item }: { item: Message }) {
   return (
     <Animated.View
       entering={FadeInUp.duration(380)}
-      style={[
-        styles.messageRow,
-        isUser ? styles.messageRowUser : styles.messageRowAssistant,
-      ]}
+      style={[styles.messageRow, isUser ? styles.messageRowUser : styles.messageRowAssistant]}
     >
       <BlurView
         intensity={14}
@@ -151,17 +131,10 @@ function MessageBubble({ item }: { item: Message }) {
               : { backgroundColor: "rgba(255,255,255,0.04)", borderColor: "rgba(255,255,255,0.07)" },
           ]}
         >
-          <Text style={[styles.messageText, { color: colors.foreground }]}>
-            {item.text}
-          </Text>
+          <Text style={[styles.messageText, { color: colors.foreground }]}>{item.text}</Text>
         </View>
       </BlurView>
-      <Text
-        style={[
-          styles.timestamp,
-          { color: colors.mutedForeground, alignSelf: isUser ? "flex-end" : "flex-start" },
-        ]}
-      >
+      <Text style={[styles.timestamp, { color: colors.mutedForeground, alignSelf: isUser ? "flex-end" : "flex-start" }]}>
         {item.timestamp}
       </Text>
     </Animated.View>
@@ -169,6 +142,7 @@ function MessageBubble({ item }: { item: Message }) {
 }
 
 export default function CompanionScreen() {
+  const router = useRouter();
   const insets = useSafeAreaInsets();
   const colors = useColors();
 
@@ -179,19 +153,15 @@ export default function CompanionScreen() {
   const inputRef = useRef<TextInput>(null);
 
   const sendOpacity = useSharedValue(0.3);
-  const inputBorderOpacity = useSharedValue(0);
 
   useEffect(() => {
     sendOpacity.value = withTiming(input.trim() ? 1 : 0.3, { duration: 180 });
   }, [input]);
 
   const sendStyle = useAnimatedStyle(() => ({ opacity: sendOpacity.value }));
-  const borderStyle = useAnimatedStyle(() => ({
-    opacity: inputBorderOpacity.value,
-  }));
 
-  const topPad = Platform.OS === "web" ? 64 : insets.top + 20;
-  const bottomPad = Platform.OS === "web" ? 34 : insets.bottom + 88;
+  const topPad = Platform.OS === "web" ? 64 : insets.top + 16;
+  const bottomPad = Platform.OS === "web" ? 34 : insets.bottom + 20;
 
   const handleSend = () => {
     const trimmed = input.trim();
@@ -226,10 +196,21 @@ export default function CompanionScreen() {
         entering={FadeInUp.delay(40).duration(600)}
         style={[styles.header, { paddingTop: topPad, borderBottomColor: "rgba(255,255,255,0.06)" }]}
       >
-        <GlowText style={styles.title}>Your Companion</GlowText>
-        <Text style={[styles.subtitle, { color: colors.mutedForeground }]}>
-          A quiet space to process what's on your mind
-        </Text>
+        <Pressable onPress={() => router.back()} hitSlop={14} style={styles.backBtn}>
+          <Feather name="arrow-left" size={20} color="rgba(255,255,255,0.45)" />
+        </Pressable>
+        <View style={styles.headerCenter}>
+          <View style={styles.headerTitleRow}>
+            <View style={[styles.onlineDot, { backgroundColor: colors.primary }]} />
+            <Text style={[styles.title, { color: colors.foreground, fontFamily: "DMSans_500Medium", fontSize: 17 }]}>
+              AI Coach
+            </Text>
+          </View>
+          <Text style={[styles.subtitle, { color: colors.mutedForeground }]}>
+            A quiet space to process
+          </Text>
+        </View>
+        <View style={{ width: 44 }} />
       </Animated.View>
 
       <KeyboardAvoidingView
@@ -267,10 +248,7 @@ export default function CompanionScreen() {
         <View
           style={[
             styles.inputContainer,
-            {
-              paddingBottom: bottomPad,
-              borderTopColor: "rgba(255,255,255,0.06)",
-            },
+            { paddingBottom: bottomPad, borderTopColor: "rgba(255,255,255,0.06)" },
           ]}
         >
           {Platform.OS !== "web" ? (
@@ -280,9 +258,7 @@ export default function CompanionScreen() {
             style={[
               styles.inputWrapper,
               {
-                borderColor: isFocused
-                  ? "rgba(148,145,240,0.40)"
-                  : "rgba(255,255,255,0.08)",
+                borderColor: isFocused ? "rgba(148,145,240,0.40)" : "rgba(255,255,255,0.08)",
                 backgroundColor: "rgba(255,255,255,0.04)",
               },
             ]}
@@ -291,24 +267,24 @@ export default function CompanionScreen() {
               ref={inputRef}
               style={[styles.input, { color: colors.foreground }]}
               placeholder="Share what's on your mind..."
-              placeholderTextColor={"rgba(255,255,255,0.22)"}
+              placeholderTextColor="rgba(255,255,255,0.22)"
               value={input}
               onChangeText={setInput}
               multiline
-              onFocus={() => {
-                setIsFocused(true);
-                inputBorderOpacity.value = withTiming(1, { duration: 200 });
-              }}
-              onBlur={() => {
-                setIsFocused(false);
-                inputBorderOpacity.value = withTiming(0, { duration: 200 });
-              }}
+              onFocus={() => setIsFocused(true)}
+              onBlur={() => setIsFocused(false)}
               returnKeyType="send"
               blurOnSubmit={false}
               onSubmitEditing={handleSend}
             />
             <Pressable onPress={handleSend} style={styles.sendBtn} hitSlop={10}>
-              <Animated.View style={[styles.sendInner, { backgroundColor: input.trim() ? colors.primary : "rgba(255,255,255,0.07)" }, sendStyle]}>
+              <Animated.View
+                style={[
+                  styles.sendInner,
+                  { backgroundColor: input.trim() ? colors.primary : "rgba(255,255,255,0.07)" },
+                  sendStyle,
+                ]}
+              >
                 <Feather
                   name="arrow-up"
                   size={15}
@@ -326,12 +302,18 @@ export default function CompanionScreen() {
 const styles = StyleSheet.create({
   flex: { flex: 1 },
   header: {
-    paddingHorizontal: 24,
-    paddingBottom: 18,
+    paddingHorizontal: 20,
+    paddingBottom: 16,
     borderBottomWidth: 1,
+    flexDirection: "row",
+    alignItems: "center",
   },
-  title: { fontSize: 27, marginBottom: 4 },
-  subtitle: { fontFamily: "DMSans_400Regular", fontSize: 14, lineHeight: 20 },
+  backBtn: { width: 44, alignItems: "flex-start" },
+  headerCenter: { flex: 1, alignItems: "center" },
+  headerTitleRow: { flexDirection: "row", alignItems: "center", gap: 7, marginBottom: 2 },
+  onlineDot: { width: 6, height: 6, borderRadius: 3, opacity: 0.8 },
+  title: {},
+  subtitle: { fontFamily: "DMSans_400Regular", fontSize: 12 },
   list: { paddingHorizontal: 18, paddingBottom: 20 },
   messageRow: { marginBottom: 14, maxWidth: "83%" },
   messageRowUser: { alignSelf: "flex-end" },
@@ -341,18 +323,8 @@ const styles = StyleSheet.create({
   bubbleBlurUser: {},
   bubbleBlurAssistant: {},
   bubbleInner: { padding: 16, borderWidth: 1, borderRadius: 20 },
-  messageText: {
-    fontFamily: "DMSans_400Regular",
-    fontSize: 15,
-    lineHeight: 23,
-  },
-  timestamp: {
-    fontFamily: "DMSans_400Regular",
-    fontSize: 11,
-    marginTop: 5,
-    paddingHorizontal: 4,
-    opacity: 0.55,
-  },
+  messageText: { fontFamily: "DMSans_400Regular", fontSize: 15, lineHeight: 23 },
+  timestamp: { fontFamily: "DMSans_400Regular", fontSize: 11, marginTop: 5, paddingHorizontal: 4, opacity: 0.55 },
   typingBubble: {
     backgroundColor: "rgba(255,255,255,0.04)",
     borderColor: "rgba(255,255,255,0.07)",
@@ -361,12 +333,7 @@ const styles = StyleSheet.create({
     borderRadius: 20,
   },
   typingDots: { flexDirection: "row", gap: 5, alignItems: "center", height: 22 },
-  inputContainer: {
-    paddingHorizontal: 18,
-    paddingTop: 12,
-    borderTopWidth: 1,
-    position: "relative",
-  },
+  inputContainer: { paddingHorizontal: 18, paddingTop: 12, borderTopWidth: 1, position: "relative" },
   inputWrapper: {
     flexDirection: "row",
     alignItems: "flex-end",
