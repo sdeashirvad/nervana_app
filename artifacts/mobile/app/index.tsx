@@ -7,12 +7,11 @@ export default function IndexScreen() {
   const { onboardingComplete, isReady } = useAppContext();
 
   if (!isReady) {
-    // Minimal dark view — avoids loading AtmosphericBackground before fonts are ready
     return <View style={{ flex: 1, backgroundColor: "#0A0B18" }} />;
   }
 
   if (onboardingComplete) {
-    return <Redirect href="/(main)/home" />;
+    return <Redirect href="/(main)/(tabs)/home" />;
   }
 
   return <Redirect href="/splash" />;

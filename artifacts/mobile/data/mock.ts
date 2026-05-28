@@ -4,9 +4,9 @@ export const mockUser = {
   stressLevel: 4,
   struggles: ["burnout", "overthinking", "work anxiety"],
   goals: ["emotional clarity", "better sleep"],
-  calmCoins: 1_240,
-  streakDays: 12,
-  joinedDate: "2025-11-01",
+  calmCoins: 0,
+  streakDays: 0,
+  joinedDate: "2026-05-28",
 };
 
 export const mockCheckins = [
@@ -95,6 +95,8 @@ export const calmingQuotes = [
   { text: "The most courageous thing you can do right now is slow down.", author: "Nervana" },
   { text: "Your worth is not measured in your output.", author: "Nervana" },
   { text: "Some days, simply getting through it is the whole achievement.", author: "Nervana" },
+  { text: "Clarity comes when you stop asking your mind to hold everything.", author: "Nervana" },
+  { text: "You are not behind. You are exactly where you need to be.", author: "Nervana" },
 ];
 
 export const DAILY_INSIGHTS = [
@@ -106,6 +108,8 @@ export const DAILY_INSIGHTS = [
   "You don't have to solve it all today.",
   "Even two minutes of stillness changes your internal weather.",
   "The pause is the practice.",
+  "Gentleness toward yourself is not weakness. It's wisdom.",
+  "What you resist persists. What you allow, passes.",
 ];
 
 export const JOURNAL_PROMPTS = [
@@ -117,6 +121,51 @@ export const JOURNAL_PROMPTS = [
   "What would you say to yourself if you were speaking to a friend?",
   "What's one thing you're pretending is fine?",
   "What does your body feel like right now?",
+  "Where have you been hardest on yourself this week?",
+  "What small thing went well today that you almost didn't notice?",
+  "What would 'enough' look like today?",
+  "If you could pause time for one hour, what would you do with it?",
+  "What feeling have you been avoiding naming?",
+  "What does rest actually look like for you?",
+  "What are you most afraid of being honest about with yourself?",
+];
+
+export const GROUNDING_STEPS = [
+  {
+    id: "1",
+    title: "Notice what you can see",
+    body: "Look around slowly. Name three things you can see right now — their colour, shape, texture.",
+    duration: 20,
+    breathCue: false,
+  },
+  {
+    id: "2",
+    title: "Feel your body's weight",
+    body: "Notice where your body makes contact with the chair or floor. Let that support hold you completely.",
+    duration: 18,
+    breathCue: true,
+  },
+  {
+    id: "3",
+    title: "Soften your jaw and shoulders",
+    body: "Unclench your jaw. Let your shoulders drop. Relax your hands. You don't need to hold anything right now.",
+    duration: 20,
+    breathCue: false,
+  },
+  {
+    id: "4",
+    title: "Take three slow breaths",
+    body: "Breathe in for 4, hold for 4, out for 6. Long exhale. Each breath tells your nervous system it's safe.",
+    duration: 35,
+    breathCue: true,
+  },
+  {
+    id: "5",
+    title: "Return to here",
+    body: "You're here. Present. Whatever was pulling at you can wait a moment longer. You've already done enough.",
+    duration: 20,
+    breathCue: false,
+  },
 ];
 
 export const AI_INSIGHTS = [
@@ -124,6 +173,7 @@ export const AI_INSIGHTS = [
   "You tend to feel calmer on mornings with fewer notifications.",
   "Short resets between tasks seem to improve your clarity.",
   "You've been more grounded this week than the last.",
+  "Journaling on hard days tends to soften the ones that follow.",
 ];
 
 export const FLOW_SCORE = {
@@ -148,4 +198,41 @@ export const mockPatterns = [
   { icon: "alert-triangle", text: "Late-meeting Thursdays often carry into your evenings." },
   { icon: "trending-up", text: "You've felt more hopeful this week than last." },
   { icon: "wind", text: "Journaling on hard days seems to soften the ones that follow." },
+  { icon: "sun", text: "Mornings with no early calls are your clearest thinking time." },
+  { icon: "zap", text: "Focus sessions over 10 min show stronger flow scores." },
+];
+
+export const PATTERN_INSIGHTS = [
+  {
+    id: "p1",
+    type: "trend",
+    headline: "Calmer than last week",
+    body: "Your average mood score is up 0.8 points compared to seven days ago.",
+    icon: "trending-up",
+    accent: "#6DC8C8",
+  },
+  {
+    id: "p2",
+    type: "pattern",
+    headline: "Thursday friction",
+    body: "Your stress scores are consistently higher on Thursdays. Late-afternoon meetings may be a factor.",
+    icon: "alert-circle",
+    accent: "#E8B86D",
+  },
+  {
+    id: "p3",
+    type: "habit",
+    headline: "Journal effect",
+    body: "Days when you journaled were followed by a mood score that was 1.2 points higher on average.",
+    icon: "edit-2",
+    accent: "#9491F0",
+  },
+  {
+    id: "p4",
+    type: "win",
+    headline: "Breathing sessions working",
+    body: "Your post-session calm scores have increased by 18% over the past two weeks.",
+    icon: "wind",
+    accent: "#6DC8C8",
+  },
 ];

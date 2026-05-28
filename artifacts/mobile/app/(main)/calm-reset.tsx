@@ -17,53 +17,68 @@ import { useAppContext } from "@/context/AppContext";
 import Animated, {
   FadeInUp,
   FadeIn,
-  FadeOut,
   useSharedValue,
   useAnimatedStyle,
-  withRepeat,
   withTiming,
-  withDelay,
-  withSpring,
+  withRepeat,
+  withSequence,
   Easing,
 } from "react-native-reanimated";
 
 const TOTAL_SECONDS = 150;
 const COINS_REWARD = 40;
+const INHALE_DUR = 4;
+const HOLD_DUR = 4;
+const EXHALE_DUR = 6;
+const CYCLE_DUR = INHALE_DUR + HOLD_DUR + EXHALE_DUR;
 
-function BreathOrb() {
+function getBreathPhase(elapsed: number): { label: string; subLabel: string; phase: "in" | "hold" | "out" } {
+  const posInCycle = elapsed % CYCLE_DUR;
+  if (posInCycle < INHALE_DUR) {
+    const rem = INHALE_DUR - Math.floor(posInCycle);
+    return { label: "Breathe in", subLabel: `${rem}`, phase: "in" };
+  } else if (posInCycle < INHALE_DUR + HOLD_DUR) {
+    const rem = INHALE_DUR + HOLD_DUR - Math.floor(posInCycle);
+    return { label: "Hold", subLabel: `${rem}`, phase: "hold" };
+  } else {
+    const rem = CYCLE_DUR - Math.floor(posInCycle);
+    return { label: "Breathe out", subLabel: `${rem}`, phase: "out" };
+  }
+}
+
+function BreathOrb({ phase }: { phase: "in" | "hold" | "out" }) {
   const scale = useSharedValue(0.88);
   const opacity = useSharedValue(0.5);
   const ringScale = useSharedValue(1);
-  const ringOpacity = useSharedValue(0);
+  const ringOpacity = useSharedValue(0.4);
 
   useEffect(() => {
-    scale.value = withRepeat(
-      withTiming(1.14, { duration: 4200, easing: Easing.inOut(Easing.sin) }),
-      -1,
-      true
-    );
-    opacity.value = withRepeat(
-      withTiming(0.85, { duration: 4200, easing: Easing.inOut(Easing.sin) }),
-      -1,
-      true
-    );
-    ringScale.value = withDelay(
-      500,
-      withRepeat(
-        withTiming(1.55, { duration: 4200, easing: Easing.inOut(Easing.sin) }),
+    const targetScale = phase === "in" ? 1.18 : phase === "hold" ? 1.18 : 0.88;
+    const targetOpacity = phase === "in" ? 0.88 : phase === "hold" ? 0.88 : 0.50;
+    const dur = phase === "in" ? INHALE_DUR * 1000 : phase === "hold" ? 80 : EXHALE_DUR * 1000;
+
+    scale.value = withTiming(targetScale, { duration: dur, easing: Easing.inOut(Easing.sin) });
+    opacity.value = withTiming(targetOpacity, { duration: dur, easing: Easing.inOut(Easing.sin) });
+
+    if (phase === "in") {
+      ringScale.value = withTiming(1.6, { duration: INHALE_DUR * 1000, easing: Easing.out(Easing.quad) });
+      ringOpacity.value = withTiming(0, { duration: INHALE_DUR * 1000 });
+    } else if (phase === "hold") {
+      ringScale.value = 1;
+      ringOpacity.value = withTiming(0.35, { duration: 300 });
+      ringScale.value = withRepeat(
+        withSequence(
+          withTiming(1.08, { duration: 800, easing: Easing.inOut(Easing.sin) }),
+          withTiming(1, { duration: 800, easing: Easing.inOut(Easing.sin) })
+        ),
         -1,
-        true
-      )
-    );
-    ringOpacity.value = withDelay(
-      500,
-      withRepeat(
-        withTiming(0, { duration: 4200, easing: Easing.inOut(Easing.sin) }),
-        -1,
-        true
-      )
-    );
-  }, []);
+        false
+      );
+    } else {
+      ringScale.value = withTiming(0.7, { duration: EXHALE_DUR * 1000, easing: Easing.in(Easing.quad) });
+      ringOpacity.value = withTiming(0, { duration: EXHALE_DUR * 1000 });
+    }
+  }, [phase]);
 
   const orbStyle = useAnimatedStyle(() => ({
     transform: [{ scale: scale.value }],
@@ -85,30 +100,30 @@ function BreathOrb() {
 }
 
 const orbStyles = StyleSheet.create({
-  container: { width: 180, height: 180, alignItems: "center", justifyContent: "center" },
+  container: { width: 200, height: 200, alignItems: "center", justifyContent: "center" },
   ring: {
     position: "absolute",
-    width: 180,
-    height: 180,
-    borderRadius: 90,
+    width: 200,
+    height: 200,
+    borderRadius: 100,
     borderWidth: 1.5,
     borderColor: "rgba(109,200,200,0.30)",
   },
   orb: {
-    width: 130,
-    height: 130,
-    borderRadius: 65,
+    width: 140,
+    height: 140,
+    borderRadius: 70,
     backgroundColor: "rgba(109,200,200,0.10)",
     borderWidth: 1,
-    borderColor: "rgba(109,200,200,0.25)",
+    borderColor: "rgba(109,200,200,0.28)",
     alignItems: "center",
     justifyContent: "center",
   },
   innerOrb: {
-    width: 80,
-    height: 80,
-    borderRadius: 40,
-    backgroundColor: "rgba(109,200,200,0.14)",
+    width: 86,
+    height: 86,
+    borderRadius: 43,
+    backgroundColor: "rgba(109,200,200,0.16)",
   },
 });
 
@@ -126,6 +141,7 @@ export default function CalmResetScreen() {
 
   const [step, setStep] = useState<"intro" | "active" | "complete">("intro");
   const [secondsLeft, setSecondsLeft] = useState(TOTAL_SECONDS);
+  const [elapsed, setElapsed] = useState(0);
   const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
   const topPad = Platform.OS === "web" ? 64 : insets.top + 24;
@@ -134,6 +150,7 @@ export default function CalmResetScreen() {
   const startSession = () => {
     setStep("active");
     setSecondsLeft(TOTAL_SECONDS);
+    setElapsed(0);
     intervalRef.current = setInterval(() => {
       setSecondsLeft((s) => {
         if (s <= 1) {
@@ -144,6 +161,7 @@ export default function CalmResetScreen() {
         }
         return s - 1;
       });
+      setElapsed((e) => e + 1);
     }, 1000);
   };
 
@@ -153,55 +171,60 @@ export default function CalmResetScreen() {
     };
   }, []);
 
-  const progress = 1 - secondsLeft / TOTAL_SECONDS;
+  const breathInfo = getBreathPhase(elapsed);
+  const phaseProgress = secondsLeft / TOTAL_SECONDS;
 
   return (
     <AtmosphericBackground variant="deep">
       <View style={[styles.container, { paddingTop: topPad, paddingBottom: bottomPad }]}>
-        {/* Header */}
         <View style={styles.header}>
-          <Pressable onPress={() => {
-            if (intervalRef.current) clearInterval(intervalRef.current);
-            router.back();
-          }} hitSlop={14}>
+          <Pressable
+            onPress={() => {
+              if (intervalRef.current) clearInterval(intervalRef.current);
+              router.back();
+            }}
+            hitSlop={14}
+          >
             <Feather name="x" size={22} color="rgba(255,255,255,0.35)" />
           </Pressable>
         </View>
 
         {step === "intro" && (
           <Animated.View entering={FadeIn.duration(600)} style={styles.content}>
-            <View style={styles.introBadge}>
-              <Feather name="wind" size={16} color="#6DC8C8" />
-              <Text style={[styles.introBadgeText, { color: "#6DC8C8" }]}>Calm Reset</Text>
+            <View style={styles.badge}>
+              <Feather name="wind" size={15} color="#6DC8C8" />
+              <Text style={[styles.badgeText, { color: "#6DC8C8" }]}>Guided Breathing</Text>
             </View>
-            <GlowText style={styles.introTitle}>A moment{"\n"}to land.</GlowText>
+            <GlowText glowColor="rgba(109,200,200,0.22)" style={styles.introTitle}>
+              A moment{"\n"}to land.
+            </GlowText>
             <Text style={[styles.introSub, { color: colors.mutedForeground }]}>
-              Two and a half minutes of gentle guidance.{"\n"}
-              Let your mind slow down and settle.{"\n"}
-              Nothing to do except breathe and be here.
+              Two and a half minutes of 4-4-6 breathing.{"\n"}
+              Inhale for 4, hold for 4, exhale for 6.{"\n"}
+              Let the rhythm do the work.
             </Text>
 
-            <View style={styles.introMeta}>
+            <View style={styles.metaRow}>
               {[
-                { icon: "clock", text: "2.5 minutes" },
-                { icon: "wind", text: "Guided breathing" },
-                { icon: "circle", text: "+40 coins" },
+                { icon: "clock", text: "2.5 min" },
+                { icon: "wind", text: "4-4-6 pattern" },
+                { icon: "circle", text: `+${COINS_REWARD} coins` },
               ].map(({ icon, text }) => (
-                <View key={text} style={[styles.metaItem, { borderColor: "rgba(255,255,255,0.07)" }]}>
-                  <Feather name={icon as any} size={13} color={colors.mutedForeground} />
+                <View key={text} style={[styles.metaChip, { borderColor: "rgba(255,255,255,0.07)" }]}>
+                  <Feather name={icon as any} size={12} color={colors.mutedForeground} />
                   <Text style={[styles.metaText, { color: colors.mutedForeground }]}>{text}</Text>
                 </View>
               ))}
             </View>
 
-            <Pressable onPress={startSession} style={{ marginTop: 44 }}>
+            <Pressable onPress={startSession} style={styles.btnWrap}>
               <LinearGradient
                 colors={["#7DC8C8", "#4AABAB", "#3A9090"]}
-                style={styles.primaryBtn}
+                style={styles.btn}
                 start={{ x: 0, y: 0 }}
                 end={{ x: 1, y: 1 }}
               >
-                <Text style={styles.primaryBtnText}>Begin Reset</Text>
+                <Text style={styles.btnText}>Begin Reset</Text>
               </LinearGradient>
             </Pressable>
           </Animated.View>
@@ -209,15 +232,23 @@ export default function CalmResetScreen() {
 
         {step === "active" && (
           <Animated.View entering={FadeIn.duration(800)} style={styles.activeContent}>
-            <Text style={[styles.phaseLabel, { color: "rgba(109,200,200,0.65)" }]}>
-              {progress < 0.33 ? "Settle in" : progress < 0.66 ? "Let it slow" : "Nearly there"}
+            <Text style={[styles.phaseEyebrow, { color: "rgba(109,200,200,0.60)" }]}>
+              {phaseProgress > 0.66 ? "Settle in" : phaseProgress > 0.33 ? "Let it slow" : "Nearly there"}
             </Text>
-            <BreathOrb />
-            <Text style={[styles.timerText, { color: colors.foreground }]}>
+
+            <BreathOrb phase={breathInfo.phase} />
+
+            <View style={styles.breathLabelBlock}>
+              <Text style={[styles.breathLabel, { color: colors.foreground }]}>
+                {breathInfo.label}
+              </Text>
+              <Text style={[styles.breathCount, { color: "rgba(109,200,200,0.70)" }]}>
+                {breathInfo.subLabel}
+              </Text>
+            </View>
+
+            <Text style={[styles.timerText, { color: "rgba(255,255,255,0.35)" }]}>
               {formatTime(secondsLeft)}
-            </Text>
-            <Text style={[styles.breathGuide, { color: colors.mutedForeground }]}>
-              {Math.floor(progress * 4) % 2 === 0 ? "Breathe in slowly" : "Breathe out gently"}
             </Text>
 
             <Pressable
@@ -225,35 +256,44 @@ export default function CalmResetScreen() {
                 if (intervalRef.current) clearInterval(intervalRef.current);
                 router.back();
               }}
-              style={styles.cancelBtn}
               hitSlop={10}
             >
-              <Text style={[styles.cancelText, { color: colors.mutedForeground }]}>End early</Text>
+              <Text style={[styles.endText, { color: "rgba(255,255,255,0.22)" }]}>End early</Text>
             </Pressable>
           </Animated.View>
         )}
 
         {step === "complete" && (
           <Animated.View entering={FadeInUp.duration(700)} style={styles.content}>
-            <View style={styles.completeBadge}>
+            <View style={[styles.completeBadge, { backgroundColor: "rgba(109,200,200,0.10)", borderColor: "rgba(109,200,200,0.28)" }]}>
               <Feather name="check" size={26} color="#6DC8C8" />
             </View>
-            <GlowText style={styles.completeTitle}>Reset complete.</GlowText>
+            <GlowText glowColor="rgba(109,200,200,0.22)" style={styles.completeTitle}>
+              Reset complete.
+            </GlowText>
             <Text style={[styles.completeSub, { color: colors.mutedForeground }]}>
               Your mind just got a little quieter.{"\n"}
               That pause matters more than you think.
             </Text>
 
-            <PremiumCoinReward coins={COINS_REWARD} />
+            <Animated.View
+              entering={FadeInUp.delay(300).duration(600)}
+              style={[styles.rewardRow, { borderColor: "rgba(148,145,240,0.20)", backgroundColor: "rgba(148,145,240,0.06)" }]}
+            >
+              <Feather name="circle" size={17} color={colors.primary} />
+              <Text style={[styles.rewardText, { color: colors.foreground }]}>
+                +{COINS_REWARD} Focus Coins earned
+              </Text>
+            </Animated.View>
 
-            <Pressable onPress={() => router.back()} style={{ marginTop: 40 }}>
+            <Pressable onPress={() => router.back()} style={[styles.btnWrap, { marginTop: 32 }]}>
               <LinearGradient
                 colors={["#7DC8C8", "#4AABAB", "#3A9090"]}
-                style={styles.primaryBtn}
+                style={styles.btn}
                 start={{ x: 0, y: 0 }}
                 end={{ x: 1, y: 1 }}
               >
-                <Text style={styles.primaryBtnText}>Back to Mindspace</Text>
+                <Text style={styles.btnText}>Back to Calm</Text>
               </LinearGradient>
             </Pressable>
           </Animated.View>
@@ -263,51 +303,12 @@ export default function CalmResetScreen() {
   );
 }
 
-function PremiumCoinReward({ coins }: { coins: number }) {
-  const colors = useColors();
-  return (
-    <Animated.View
-      entering={FadeInUp.delay(300).duration(600)}
-      style={[rewardStyles.wrap, { borderColor: "rgba(148,145,240,0.20)", backgroundColor: "rgba(148,145,240,0.06)" }]}
-    >
-      <Feather name="circle" size={18} color={colors.primary} />
-      <Text style={[rewardStyles.text, { color: colors.foreground }]}>+{coins} Focus Coins earned</Text>
-    </Animated.View>
-  );
-}
-
-const rewardStyles = StyleSheet.create({
-  wrap: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 10,
-    borderWidth: 1,
-    borderRadius: 16,
-    paddingVertical: 14,
-    paddingHorizontal: 20,
-    marginTop: 28,
-    alignSelf: "center",
-  },
-  text: { fontFamily: "DMSans_500Medium", fontSize: 15 },
-});
-
 const styles = StyleSheet.create({
   container: { flex: 1, paddingHorizontal: 26 },
   header: { flexDirection: "row", justifyContent: "flex-end", marginBottom: 8 },
   content: { flex: 1, justifyContent: "center" },
-  activeContent: {
-    flex: 1,
-    justifyContent: "center",
-    alignItems: "center",
-    gap: 28,
-  },
-  introBadge: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 8,
-    marginBottom: 20,
-  },
-  introBadgeText: { fontFamily: "DMSans_500Medium", fontSize: 14, letterSpacing: 0.3 },
+  badge: { flexDirection: "row", alignItems: "center", gap: 8, marginBottom: 22 },
+  badgeText: { fontFamily: "DMSans_500Medium", fontSize: 14, letterSpacing: 0.3 },
   introTitle: { fontSize: 42, lineHeight: 52, marginBottom: 22 },
   introSub: {
     fontFamily: "DMSans_400Regular",
@@ -315,53 +316,59 @@ const styles = StyleSheet.create({
     lineHeight: 28,
     marginBottom: 32,
   },
-  introMeta: { flexDirection: "row", flexWrap: "wrap", gap: 10 },
-  metaItem: {
+  metaRow: { flexDirection: "row", flexWrap: "wrap", gap: 8, marginBottom: 40 },
+  metaChip: {
     flexDirection: "row",
     alignItems: "center",
-    gap: 7,
+    gap: 6,
     borderWidth: 1,
-    borderRadius: 12,
-    paddingHorizontal: 12,
-    paddingVertical: 8,
+    borderRadius: 10,
+    paddingHorizontal: 11,
+    paddingVertical: 7,
   },
   metaText: { fontFamily: "DMSans_400Regular", fontSize: 13 },
-  primaryBtn: {
-    borderRadius: 20,
-    paddingVertical: 19,
-    alignItems: "center",
-  },
-  primaryBtnText: {
+  btnWrap: { borderRadius: 20, overflow: "hidden" },
+  btn: { paddingVertical: 19, alignItems: "center", borderRadius: 20 },
+  btnText: {
     fontFamily: "DMSans_600SemiBold",
     fontSize: 17,
     color: "#F0EDE8",
     letterSpacing: 0.2,
   },
-  phaseLabel: {
+  activeContent: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    gap: 22,
+  },
+  phaseEyebrow: {
+    fontFamily: "DMSans_400Regular",
+    fontSize: 13,
+    letterSpacing: 1.2,
+    textTransform: "uppercase",
+  },
+  breathLabelBlock: { alignItems: "center", gap: 6 },
+  breathLabel: {
+    fontFamily: "DMSerifDisplay_400Regular",
+    fontSize: 32,
+    letterSpacing: 0.5,
+  },
+  breathCount: {
+    fontFamily: "DMSans_400Regular",
+    fontSize: 18,
+    letterSpacing: 1,
+  },
+  timerText: {
     fontFamily: "DMSans_400Regular",
     fontSize: 14,
     letterSpacing: 0.5,
-    textTransform: "uppercase",
   },
-  timerText: {
-    fontFamily: "DMSerifDisplay_400Regular",
-    fontSize: 58,
-    letterSpacing: 2,
-  },
-  breathGuide: {
-    fontFamily: "DMSans_400Regular",
-    fontSize: 16,
-    letterSpacing: 0.3,
-  },
-  cancelBtn: { paddingTop: 10 },
-  cancelText: { fontFamily: "DMSans_400Regular", fontSize: 15 },
+  endText: { fontFamily: "DMSans_400Regular", fontSize: 15 },
   completeBadge: {
     width: 72,
     height: 72,
     borderRadius: 36,
-    backgroundColor: "rgba(109,200,200,0.10)",
     borderWidth: 1,
-    borderColor: "rgba(109,200,200,0.25)",
     alignItems: "center",
     justifyContent: "center",
     marginBottom: 24,
@@ -371,5 +378,18 @@ const styles = StyleSheet.create({
     fontFamily: "DMSans_400Regular",
     fontSize: 17,
     lineHeight: 28,
+    marginBottom: 4,
   },
+  rewardRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 10,
+    borderWidth: 1,
+    borderRadius: 16,
+    paddingVertical: 14,
+    paddingHorizontal: 20,
+    marginTop: 24,
+    alignSelf: "center",
+  },
+  rewardText: { fontFamily: "DMSans_500Medium", fontSize: 15 },
 });

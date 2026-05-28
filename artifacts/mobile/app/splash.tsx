@@ -17,18 +17,19 @@ import { LinearGradient } from "expo-linear-gradient";
 export default function SplashScreen() {
   const router = useRouter();
 
-  const bgOpacity    = useSharedValue(0);
-  const logoOpacity  = useSharedValue(0);
-  const logoY        = useSharedValue(20);
-  const taglineOp    = useSharedValue(0);
-  const dotsOp       = useSharedValue(0);
+  const bgOpacity   = useSharedValue(0);
+  const logoOpacity = useSharedValue(0);
+  const logoY       = useSharedValue(20);
+  const taglineOp   = useSharedValue(0);
+  const dotsOp      = useSharedValue(0);
 
   useEffect(() => {
     bgOpacity.value   = withTiming(1, { duration: 1000 });
     logoOpacity.value = withDelay(400, withTiming(1, { duration: 1100, easing: Easing.out(Easing.cubic) }));
     logoY.value       = withDelay(400, withTiming(0, { duration: 1100, easing: Easing.out(Easing.cubic) }));
     taglineOp.value   = withDelay(900, withTiming(1, { duration: 900, easing: Easing.out(Easing.quad) }));
-    dotsOp.value      = withDelay(1200,
+    dotsOp.value      = withDelay(
+      1200,
       withRepeat(
         withSequence(
           withTiming(0.55, { duration: 950, easing: Easing.inOut(Easing.sin) }),
@@ -39,7 +40,7 @@ export default function SplashScreen() {
       )
     );
 
-    const t = setTimeout(() => router.replace("/onboarding"), 3000);
+    const t = setTimeout(() => router.replace("/intro"), 3000);
     return () => clearTimeout(t);
   }, []);
 
@@ -64,7 +65,6 @@ export default function SplashScreen() {
           contentFit="cover"
           transition={1000}
         />
-        {/* Top ambient glow */}
         <View style={styles.topGlow} />
         <View style={styles.bottomGlow} />
       </Animated.View>

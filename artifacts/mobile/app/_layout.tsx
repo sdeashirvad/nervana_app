@@ -28,7 +28,10 @@ function RootLayoutNav() {
     <Stack screenOptions={{ headerShown: false, animation: "fade" }}>
       <Stack.Screen name="index" />
       <Stack.Screen name="splash" />
+      <Stack.Screen name="intro" />
       <Stack.Screen name="onboarding" />
+      <Stack.Screen name="auth" />
+      <Stack.Screen name="guest-name" />
       <Stack.Screen name="(main)" />
     </Stack>
   );

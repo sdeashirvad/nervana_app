@@ -1,4 +1,5 @@
 import { Redirect } from "expo-router";
-export default function ProfileScreen() {
-  return <Redirect href="/(main)/home" />;
+
+export default function OldProfileRedirect() {
+  return <Redirect href="/(main)/(tabs)/profile" />;
 }

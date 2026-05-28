@@ -16,16 +16,17 @@ import { useAppContext } from "@/context/AppContext";
 export default function GuestNameScreen() {
   const router = useRouter();
   const colors = useColors();
-  const { setCurrentUser } = useAppContext();
+  const { setCurrentUser, setOnboardingComplete } = useAppContext();
   const [name, setName] = useState("");
   const inputRef = useRef<TextInput>(null);
 
   const trimmed = name.trim();
 
-  const handleContinue = () => {
+  const handleContinue = async () => {
     if (!trimmed) return;
     setCurrentUser({ name: trimmed, isGuest: true });
-    router.push("/flow");
+    await setOnboardingComplete(true);
+    router.replace("/(main)/(tabs)/home");
   };
 
   return (
@@ -33,7 +34,7 @@ export default function GuestNameScreen() {
       onBack={() => router.back()}
       footer={
         trimmed.length > 0 ? (
-          <CalmButton title="Continue" onPress={handleContinue} />
+          <CalmButton title="Enter Mindspace" onPress={handleContinue} />
         ) : null
       }
     >
